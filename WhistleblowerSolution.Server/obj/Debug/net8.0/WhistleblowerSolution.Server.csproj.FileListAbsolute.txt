@@ -33,3 +33,4 @@ C:\Users\Domin\Desktop\EASV Projects\Security\WhistleblowerSolution\Whistleblowe
 C:\Users\Domin\Desktop\EASV Projects\Security\WhistleblowerSolution\WhistleblowerSolution.Server\obj\Debug\net8.0\WhistleblowerSolution.Server.pdb
 C:\Users\Domin\Desktop\EASV Projects\Security\WhistleblowerSolution\WhistleblowerSolution.Server\obj\Debug\net8.0\WhistleblowerSolution.Server.genruntimeconfig.cache
 C:\Users\Domin\Desktop\EASV Projects\Security\WhistleblowerSolution\WhistleblowerSolution.Server\obj\Debug\net8.0\ref\WhistleblowerSolution.Server.dll
+C:\Users\Domin\Desktop\EASV Projects\Security\WhistleblowerSolution\WhistleblowerSolution.Server\obj\Debug\net8.0\WhistleblowerSolution.Server.sourcelink.json
