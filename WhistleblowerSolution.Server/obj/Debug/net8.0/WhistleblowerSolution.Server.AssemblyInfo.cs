@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("WhistleblowerSolution.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+783ff675aef7b83818826ed92c1278ac70f2ba5f")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0ee5d05fb28dc34868c19f59de9a102157b32503")]
 [assembly: System.Reflection.AssemblyProductAttribute("WhistleblowerSolution.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("WhistleblowerSolution.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
