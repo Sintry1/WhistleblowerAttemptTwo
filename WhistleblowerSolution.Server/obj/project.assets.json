@@ -6559,24 +6559,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\jespe\\.nuget\\packages\\": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Users\\Domin\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Source\\Repos\\WhistleblowerAttemptTwo\\whistleblowerSolution.server\\WhistleblowerSolution.Server.csproj",
+      "projectUniqueName": "C:\\Users\\Domin\\Desktop\\EASV Projects\\Security\\WhistleblowerSolution\\WhistleblowerSolution.Server\\WhistleblowerSolution.Server.csproj",
       "projectName": "WhistleblowerSolution.Server",
-      "projectPath": "D:\\Source\\Repos\\WhistleblowerAttemptTwo\\whistleblowerSolution.server\\WhistleblowerSolution.Server.csproj",
-      "packagesPath": "C:\\Users\\jespe\\.nuget\\packages\\",
-      "outputPath": "D:\\Source\\Repos\\WhistleblowerAttemptTwo\\whistleblowerSolution.server\\obj\\",
+      "projectPath": "C:\\Users\\Domin\\Desktop\\EASV Projects\\Security\\WhistleblowerSolution\\WhistleblowerSolution.Server\\WhistleblowerSolution.Server.csproj",
+      "packagesPath": "C:\\Users\\Domin\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Domin\\Desktop\\EASV Projects\\Security\\WhistleblowerSolution\\WhistleblowerSolution.Server\\obj\\",
       "projectStyle": "PackageReference",
-      "fallbackFolders": [
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-      ],
       "configFilePaths": [
-        "C:\\Users\\jespe\\AppData\\Roaming\\NuGet\\NuGet.Config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Users\\Domin\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -6584,7 +6579,6 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
