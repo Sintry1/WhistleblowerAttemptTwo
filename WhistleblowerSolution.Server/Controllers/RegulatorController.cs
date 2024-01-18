@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WhistleblowerSolution.Server.Database;
-using static Mysqlx.Error.Types;
 
 namespace WhistleblowerSolution.Server.Controllers
 {
@@ -8,6 +8,7 @@ namespace WhistleblowerSolution.Server.Controllers
     {
         private readonly JwtService jwtService;
         private readonly PreparedStatements ps = PreparedStatements.CreateInstance();
+
 
         [HttpGet("GetPublicKey/{industryName}")]
         public IActionResult FindIvFromRegulatorIndustryName(string industryName)
@@ -25,6 +26,7 @@ namespace WhistleblowerSolution.Server.Controllers
                 return StatusCode(500, new { Success = false, Message = "Internal server error." });
             }
         }
+
 
         [HttpPost("createRegulator")]
         public IActionResult CreateRegulator([FromBody] Regulator regulator)
@@ -75,6 +77,28 @@ namespace WhistleblowerSolution.Server.Controllers
                 return Unauthorized("Invalid credentials");
             }
         }
+
+
+        [HttpGet("getReports/{industryName}")]
+        [Authorize]
+        public IActionResult RetrieveReports(string industryName)
+        {
+
+            try
+            {
+                string userName = User.FindFirst("unique_name").Value;
+                List<Report> reports = ps.RetrieveReports(industryName);
+
+                return Ok(new { Success = true, Reports = reports });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                return StatusCode(500, new { Success = false, Message = "Internal server error." });
+            }
+        }
+
+
 
 
 

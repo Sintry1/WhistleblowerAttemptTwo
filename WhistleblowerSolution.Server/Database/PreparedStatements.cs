@@ -25,7 +25,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //for getting industry ID from industry name
-        public int GetIndustryID(string industryName)
+        internal int GetIndustryID(string industryName)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //fetching publickey
-        public string GetPublicKey(string industryName)
+        internal string GetPublicKey(string industryName)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
-        public void CreateRegulator(Regulator regulator)
+        internal void CreateRegulator(Regulator regulator)
         {
             //Calls another prepared statement to get the industry ID from the industry name
             int industryId = GetIndustryID(regulator.IndustryName);
@@ -204,7 +204,7 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
-        public bool UserExists(string userName)
+        internal bool UserExists(string userName)
         {
             dbConnection.SetConnectionCredentials(Env.GetString("OTHER_READER_NAME"), Env.GetString("OTHER_READER_PASSWORD"));
 
@@ -251,10 +251,204 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
+        //Gets userId from userName
+        internal int GetUserID(string userName)
+        {
+            try
+            {
+                // Set credentials for the user needed
+                dbConnection.SetConnectionCredentials(
+                    Env.GetString("OTHER_READER_NAME"),
+                    Env.GetString("OTHER_READER_PASSWORD")
+                );
 
+                // Use MySqlConnection to open the connection and throw an exception if it fails
+                using (MySqlConnection connection = dbConnection.OpenConnection())
+                {
+                    Console.WriteLine("Connection opened successfully.");
 
+                    try
+                    {
+                        // Query to get industry_id based on industryName
+                        string industryIdQuery =
+                            "SELECT regulator_id FROM regulators WHERE regulator_name = @userName";
 
+                        // Create and prepare an SQL statement for industry_id
+                        MySqlCommand userIdCommand = new MySqlCommand(
+                            industryIdQuery,
+                            connection
+                        );
 
+                        userIdCommand.Parameters.AddWithValue("@userName", userName);
+
+                        userIdCommand.Prepare();
+
+                        // Execute the query to get industry_id
+                        int userId = Convert.ToInt32(userIdCommand.ExecuteScalar());
+
+                        return userId;
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"Error preparing command: {ex.Message}");
+                        throw;
+                    }
+                    catch (MySqlException ex)
+                    {
+                        // Handle the exception (e.g., log it) and rethrow
+                        Console.WriteLine($"Error executing query: {ex.Message}");
+                        throw; // Rethrow the caught exception
+                    }
+                    finally
+                    {
+                        // Close the connection at the end
+                        dbConnection.CloseConnection();
+                        Console.WriteLine("Connection closed.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception if opening the connection fails
+                Console.WriteLine($"Error opening connection: {ex.Message}");
+                throw; // Rethrow the caught exception
+            }
+        }
+
+        //Gets the industry ID related to the given user with the username passed
+        internal int GetUserIndustryID(string userName)
+        {
+            try
+            {
+                // Set credentials for the user needed
+                dbConnection.SetConnectionCredentials(
+                    Env.GetString("OTHER_READER_NAME"),
+                    Env.GetString("OTHER_READER_PASSWORD")
+                );
+
+                // Use MySqlConnection to open the connection and throw an exception if it fails
+                using (MySqlConnection connection = dbConnection.OpenConnection())
+                {
+                    Console.WriteLine("Connection opened successfully.");
+
+                    try
+                    {
+                        // Query to get industry_id based on industryName
+                        string industryIdQuery =
+                            "SELECT industry_id FROM regulators WHERE regulator_name = @userName";
+
+                        // Create and prepare an SQL statement for industry_id
+                        MySqlCommand userIndustryIdCommand = new MySqlCommand(
+                            industryIdQuery,
+                            connection
+                        );
+
+                        userIndustryIdCommand.Parameters.AddWithValue("@userName", userName);
+
+                        userIndustryIdCommand.Prepare();
+
+                        // Execute the query to get industry_id
+                        int userIndustryId = Convert.ToInt32(userIndustryIdCommand.ExecuteScalar());
+
+                        return userIndustryId;
+                    }
+                    catch (InvalidOperationException ex)
+                    {
+                        Console.WriteLine($"Error preparing command: {ex.Message}");
+                        throw;
+                    }
+                    catch (MySqlException ex)
+                    {
+                        // Handle the exception (e.g., log it) and rethrow
+                        Console.WriteLine($"Error executing query: {ex.Message}");
+                        throw; // Rethrow the caught exception
+                    }
+                    finally
+                    {
+                        // Close the connection at the end
+                        dbConnection.CloseConnection();
+                        Console.WriteLine("Connection closed.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception if opening the connection fails
+                Console.WriteLine($"Error opening connection: {ex.Message}");
+                throw; // Rethrow the caught exception
+            }
+        }
+
+        internal List<Report> RetrieveReports(string industryName)
+        {
+            List<Report> reports = new List<Report>();
+
+            //Calls another prepared statement to get the industry ID from the industry name
+            int industryId = GetIndustryID(industryName);
+
+            // Set credentials for the user needed
+            dbConnection.SetConnectionCredentials(
+                Env.GetString("REPORT_READER_NAME"),
+                Env.GetString("REPORT_READER_PASSWORD")
+            );
+
+            // Use mySqlConnection to open the connection and throw an exception if it fails
+            using (MySqlConnection connection = dbConnection.OpenConnection())
+            {
+                try
+                {
+                    // Create an instance of MySqlCommand
+                    MySqlCommand command = new MySqlCommand(null, connection);
+
+                    // Create and prepare an SQL statement.
+                    command.CommandText = "SELECT * FROM reports WHERE industry_id = @industry_id";
+
+                    // Set mySQL parameters for the prepared statement
+                    MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
+                    command.Parameters.Add(industryIDParam);
+
+                    // Execute the query
+                    using (MySqlDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            // Read data from the database and create a Report object
+                            int reportID = reader.GetInt32("report_id");
+                            string companyName = reader.GetString("company_name");
+                            string companyIv = reader.GetString("company_iv");
+                            string description = reader.GetString("description");
+                            string descIv = reader.GetString("desc_iv");
+                            string email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString("email");
+
+                            Report report = new Report(
+                                reportID,
+                                industryName,
+                                companyName,
+                                companyIv,
+                                description,
+                                descIv,
+                                email
+                            );
+                            reports.Add(report);
+                        }
+                    }
+
+                    // Return the list of reports
+                    return reports;
+                }
+                catch (MySqlException ex)
+                {
+                    // Handle the exception (e.g., log it) and return an empty list or null
+                    // You may want to implement secure logging to store the error message
+                    return new List<Report>();
+                }
+                finally
+                {
+                    // Close the connection at the end
+                    dbConnection.CloseConnection();
+                }
+            }
+        }
 
 
     }
