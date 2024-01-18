@@ -1,6 +1,7 @@
 ﻿using DotNetEnv;
 using MySql.Data.MySqlClient;
 
+
 namespace WhistleblowerSolution.Server.Database
 {
     public class DBConnection

@@ -415,19 +415,21 @@ namespace WhistleblowerSolution.Server.Database
                             // Read data from the database and create a Report object
                             int reportID = reader.GetInt32("report_id");
                             string companyName = reader.GetString("company_name");
-                            string companyIv = reader.GetString("company_iv");
                             string description = reader.GetString("description");
-                            string descIv = reader.GetString("desc_iv");
                             string email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString("email");
+                            string key = reader.GetString("key");
+                            string iv = reader.GetString("iv");
+                            string salt = reader.GetString("salt");
 
                             Report report = new Report(
                                 reportID,
                                 industryName,
                                 companyName,
-                                companyIv,
                                 description,
-                                descIv,
-                                email
+                                email,
+                                key,
+                                iv,
+                                salt
                             );
                             reports.Add(report);
                         }
