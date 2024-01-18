@@ -18,7 +18,7 @@ namespace WhistleblowerSolution.Server.Database
             SetDefaultConnection();
         }
 
-        private void SetDefaultConnection()
+        internal void SetDefaultConnection()
         {
             Env.Load();
 
@@ -29,7 +29,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         // Set the connection credentials dynamically
-        private void SetConnectionCredentials(string username, string password)
+        internal void SetConnectionCredentials(string username, string password)
         {
             userCredentials = $"User ID={username};Password={password};";
         }
@@ -41,7 +41,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //Method for opening connection to the database
-        private MySqlConnection OpenConnection()
+        internal MySqlConnection OpenConnection()
         {
             //tries to execute code
             try
@@ -68,7 +68,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //Method for closing connection
-        private void CloseConnection()
+        internal void CloseConnection()
         {
             try
             {
@@ -87,7 +87,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //method for disposing connection, it also closes the connection before disposing of it
-        private void Dispose()
+        internal void Dispose()
         {
             CloseConnection();
             connection.Dispose();

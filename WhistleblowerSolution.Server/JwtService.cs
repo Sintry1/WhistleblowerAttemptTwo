@@ -16,23 +16,24 @@ namespace WhistleblowerSolution.Server
 
             // Retrieve the secret key from the environment variables
             secretKey = Env.GetString("secretKey");
+
         }
 
-        private string GenerateToken(string userId, string username)
+        /*
+        internal string GenerateToken(string username)
         {
+
             Env.Load();
 
-            var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(secretKey));
+            var securityKey = new SymmetricSecurityKey(Convert.FromBase64String(Env.GetString("Secret_Key")));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             //Content that the client can unpack from the JWT
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.UniqueName, username),
             
-        };
-
+            };
             var token = new JwtSecurityToken(
                 issuer: "WhistleblowerSolution",
                 audience: "Regulators",
@@ -45,5 +46,6 @@ namespace WhistleblowerSolution.Server
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+        */
     }
 }
