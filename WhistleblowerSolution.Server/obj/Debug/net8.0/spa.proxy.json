@@ -3,7 +3,7 @@
 "ServerUrl": "https://localhost:5173",
 "RedirectUrl": "",
 "LaunchCommand": "npm run dev",
-"WorkingDirectory": "C:\\Users\\Domin\\Desktop\\EASV Projects\\Security\\WhistleblowerSolution\\WhistleblowerSolution.Server\\..\\whistleblowersolution.client",
+"WorkingDirectory": "D:\\Source\\Repos\\WhistleblowerAttemptTwo\\WhistleblowerSolution.Server\\..\\whistleblowersolution.client",
 "MaxTimeoutInSeconds": "120",
 "KeepRunning": "false"
 }
