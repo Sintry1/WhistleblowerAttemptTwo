@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WhistleblowerSolution.Server.Database;
+using static Mysqlx.Error.Types;
 
 
 namespace WhistleblowerSolution.Server.Controllers
@@ -60,16 +61,15 @@ namespace WhistleblowerSolution.Server.Controllers
 
 
         [HttpPost]
-        [Route("login")]
         public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
             // Check if the provided username matches a predefined value
-            if (ps.UserExists(loginRequest.Username))
+            if (loginRequest.UsernameCheck)
             {
-                if (loginRequest.BooleanCheck) 
+                if (loginRequest.PasswordCheck) 
                 { 
                     // Generate a JWT token for the authenticated user
-                    var token = jwtService.GenerateToken(loginRequest.Username);
+                    var token = jwtService.GenerateToken(loginRequest.industryName);
 
                     return Ok(new { Token = token });
                 } 
@@ -107,13 +107,44 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
 
+        [HttpPost("PasswordCheck/{industryName}")]
+        public IActionResult GetPassword(string industryName)
+        {
+            try
+            {
+                string hashedPassword = ps.GetHashedPassword(industryName);
+
+                return Ok(new { Success = true, HashedPassword = hashedPassword });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                return StatusCode(500, new { Success = false, Message = "Internal server error." });
+            }
+        }
 
 
+        [HttpGet("UsernameCheck/{industryName}")]
+        public IActionResult GetUserName(string industryName)
+        {
+            try
+            {
+                string hashedPassword = ps.GetUserName(industryName);
+
+                return Ok(new { Success = true, HashedPassword = hashedPassword });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception for debugging purposes
+                return StatusCode(500, new { Success = false, Message = "Internal server error." });
+            }
+        }
 
     }
     public class LoginRequest
     {
-        public string Username { get; set; }
-        public bool BooleanCheck { get; set; }
+        public bool UsernameCheck { get; set; }
+        public string industryName { get; set; }
+        public bool PasswordCheck { get; set; }
     }
 }

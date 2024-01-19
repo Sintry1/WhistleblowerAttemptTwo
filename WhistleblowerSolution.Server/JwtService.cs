@@ -24,7 +24,7 @@ namespace WhistleblowerSolution.Server
         }
 
 
-        internal string GenerateToken(string username)
+        internal string GenerateToken(string industryName)
         {
 
             Env.Load();
@@ -38,9 +38,9 @@ namespace WhistleblowerSolution.Server
             //Content that the client can unpack from the JWT
             var claims = new[]
             {
-            new Claim(JwtRegisteredClaimNames.UniqueName, username),
-            new Claim("userId", ps.GetUserID(username).ToString()),
-            new Claim("industryId", ps.GetUserIndustryID(username).ToString())
+            new Claim(JwtRegisteredClaimNames.UniqueName, industryName),
+            new Claim("userId", ps.GetUserID(industryName).ToString()),
+            new Claim("industryId", ps.GetIndustryID(industryName).ToString())
             };
 
             var token = new JwtSecurityToken(

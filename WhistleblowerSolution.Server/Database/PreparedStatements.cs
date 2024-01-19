@@ -252,8 +252,11 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //Gets userId from userName
-        internal int GetUserID(string userName)
+        internal int GetUserID(string industryName)
         {
+            //Calls another prepared statement to get the industry ID from the industry name
+            int industryId = GetIndustryID(industryName);
+
             try
             {
                 // Set credentials for the user needed
@@ -271,7 +274,7 @@ namespace WhistleblowerSolution.Server.Database
                     {
                         // Query to get industry_id based on industryName
                         string industryIdQuery =
-                            "SELECT regulator_id FROM regulators WHERE regulator_name = @userName";
+                            "SELECT regulator_id FROM regulators WHERE industry_id = @industryId";
 
                         // Create and prepare an SQL statement for industry_id
                         MySqlCommand userIdCommand = new MySqlCommand(
@@ -279,7 +282,7 @@ namespace WhistleblowerSolution.Server.Database
                             connection
                         );
 
-                        userIdCommand.Parameters.AddWithValue("@userName", userName);
+                        userIdCommand.Parameters.AddWithValue("@industryId", industryId);
 
                         userIdCommand.Prepare();
 
@@ -287,70 +290,6 @@ namespace WhistleblowerSolution.Server.Database
                         int userId = Convert.ToInt32(userIdCommand.ExecuteScalar());
 
                         return userId;
-                    }
-                    catch (InvalidOperationException ex)
-                    {
-                        Console.WriteLine($"Error preparing command: {ex.Message}");
-                        throw;
-                    }
-                    catch (MySqlException ex)
-                    {
-                        // Handle the exception (e.g., log it) and rethrow
-                        Console.WriteLine($"Error executing query: {ex.Message}");
-                        throw; // Rethrow the caught exception
-                    }
-                    finally
-                    {
-                        // Close the connection at the end
-                        dbConnection.CloseConnection();
-                        Console.WriteLine("Connection closed.");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                // Handle the exception if opening the connection fails
-                Console.WriteLine($"Error opening connection: {ex.Message}");
-                throw; // Rethrow the caught exception
-            }
-        }
-
-        //Gets the industry ID related to the given user with the username passed
-        internal int GetUserIndustryID(string userName)
-        {
-            try
-            {
-                // Set credentials for the user needed
-                dbConnection.SetConnectionCredentials(
-                    Env.GetString("OTHER_READER_NAME"),
-                    Env.GetString("OTHER_READER_PASSWORD")
-                );
-
-                // Use MySqlConnection to open the connection and throw an exception if it fails
-                using (MySqlConnection connection = dbConnection.OpenConnection())
-                {
-                    Console.WriteLine("Connection opened successfully.");
-
-                    try
-                    {
-                        // Query to get industry_id based on industryName
-                        string industryIdQuery =
-                            "SELECT industry_id FROM regulators WHERE regulator_name = @userName";
-
-                        // Create and prepare an SQL statement for industry_id
-                        MySqlCommand userIndustryIdCommand = new MySqlCommand(
-                            industryIdQuery,
-                            connection
-                        );
-
-                        userIndustryIdCommand.Parameters.AddWithValue("@userName", userName);
-
-                        userIndustryIdCommand.Prepare();
-
-                        // Execute the query to get industry_id
-                        int userIndustryId = Convert.ToInt32(userIndustryIdCommand.ExecuteScalar());
-
-                        return userIndustryId;
                     }
                     catch (InvalidOperationException ex)
                     {
@@ -562,8 +501,105 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
+        public string GetHashedPassword(string industryName)
+        {
+            //Calls another prepared statement to get the industry ID from the industry name
+            int industryId = GetIndustryID(industryName);
 
+            //Set credentials for the user needed
+            dbConnection.SetConnectionCredentials(
+                Env.GetString("OTHER_READER_NAME"),
+                Env.GetString("OTHER_READER_PASSWORD")
+            );
 
+            //uses mySqlConnection to open the connection and throws an exception if it fails
+            using (MySqlConnection connection = dbConnection.OpenConnection())
+            {
+                try
+                {
+                    //creates an instance of MySqlCommand, a method in the mysql library
+                    MySqlCommand command = new MySqlCommand(null, connection);
+
+                    // Create and prepare an SQL statement.
+                    command.CommandText =
+                        $"SELECT password FROM regulators WHERE industry_id = @industryId";
+
+                    // Sets a mySQL parameter for the prepared statement
+                    MySqlParameter industryIdParam = new MySqlParameter("industry_id", industryId);
+
+                    // Adds the parameter to the command
+                    command.Parameters.Add(industryIdParam);
+
+                    // Call Prepare after setting the Commandtext and Parameters.
+                    command.Prepare();
+
+                    // Execute the query
+                    object result = command.ExecuteScalar();
+
+                    //Casts the result to string
+                    string storedHash = result.ToString();
+
+                    //returns the hashed password
+                    return storedHash;
+                }
+                //executes at the end, no matter if it returned a value before or not
+                finally
+                {
+                    //closes the connection at the VERY end
+                    dbConnection.CloseConnection();
+                }
+            }
+        }
+
+        public string GetUserName(string industryName)
+        {
+            //Calls another prepared statement to get the industry ID from the industry name
+            int industryId = GetIndustryID(industryName);
+
+            //Set credentials for the user needed
+            dbConnection.SetConnectionCredentials(
+                Env.GetString("OTHER_READER_NAME"),
+                Env.GetString("OTHER_READER_PASSWORD")
+            );
+
+            //uses mySqlConnection to open the connection and throws an exception if it fails
+            using (MySqlConnection connection = dbConnection.OpenConnection())
+            {
+                try
+                {
+                    //creates an instance of MySqlCommand, a method in the mysql library
+                    MySqlCommand command = new MySqlCommand(null, connection);
+
+                    // Create and prepare an SQL statement.
+                    command.CommandText =
+                        $"SELECT regulator_name FROM regulators WHERE industry_id = @industryId";
+
+                    // Sets a mySQL parameter for the prepared statement
+                    MySqlParameter industryIdParam = new MySqlParameter("industry_id", industryId);
+
+                    // Adds the parameter to the command
+                    command.Parameters.Add(industryIdParam);
+
+                    // Call Prepare after setting the Commandtext and Parameters.
+                    command.Prepare();
+
+                    // Execute the query
+                    object result = command.ExecuteScalar();
+
+                    //Casts the result to string
+                    string storedHash = result.ToString();
+
+                    //returns the hashed password
+                    return storedHash;
+                }
+                //executes at the end, no matter if it returned a value before or not
+                finally
+                {
+                    //closes the connection at the VERY end
+                    dbConnection.CloseConnection();
+                }
+            }
+        }
 
 
     }
