@@ -2,12 +2,20 @@
 using Microsoft.AspNetCore.Mvc;
 using WhistleblowerSolution.Server.Database;
 
+
 namespace WhistleblowerSolution.Server.Controllers
 {
     public class RegulatorController : Controller
     {
         private readonly JwtService jwtService;
-        private readonly PreparedStatements ps = PreparedStatements.CreateInstance();
+        private readonly PreparedStatements ps;
+
+        public RegulatorController()
+        {
+            // Instantiate the Security class when creating the controller
+            ps = PreparedStatements.CreateInstance();
+            jwtService = new JwtService();
+        }
 
 
         [HttpGet("GetPublicKey/{industryName}")]

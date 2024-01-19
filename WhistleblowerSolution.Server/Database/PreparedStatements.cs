@@ -453,5 +453,118 @@ namespace WhistleblowerSolution.Server.Database
         }
 
 
+        /*
+         * Takes an object of type Report, made using the Report class
+         * Tries to takes parameters from the object and sets them as paramaters for the prepared statement
+         * Returns true to the function that called it IF it succeds
+         * it returns false if it fails/catches an error
+         */
+        public bool SendReport(Report report)
+        {
+            //Calls another prepared statement to get the industry ID from the industry name
+            DotNetEnv.Env.Load();
+            int industryId = GetIndustryID(report.IndustryName);
+
+            try
+            {
+                // Set credentials for the user needed
+                dbConnection.SetConnectionCredentials(
+                    Env.GetString("REPORT_WRITER_NAME"),
+                    Env.GetString("REPORT_WRITER_PASSWORD")
+                );
+                // Use mySqlConnection to open the connection and throw an exception if it fails
+                using (MySqlConnection connection = dbConnection.OpenConnection())
+                {
+                    try
+                    {
+                        // Create an instance of MySqlCommand
+                        MySqlCommand command = new MySqlCommand(null, connection);
+
+                        // Create and prepare an SQL statement.
+                        command.CommandText =
+                            $"INSERT INTO reports (industry_id, company_name, description, email, key, iv, salt) VALUES (@industry_id, @company_name, @description, @email, @key, @iv, @salt)";
+
+                        // Sets mySQL parameters for the prepared statement
+                        MySqlParameter industryIDParam = new MySqlParameter(
+                            "industry_id",
+                            industryId
+                        );
+                        MySqlParameter companyNameParam = new MySqlParameter(
+                            "company_name",
+                            report.CompanyName
+                        );
+                        MySqlParameter descriptionParam = new MySqlParameter(
+                            "description",
+                            report.Description
+                        );
+                        MySqlParameter keyParam = new MySqlParameter(
+                            "key",
+                            report.Key
+                        );
+                        MySqlParameter IVParam = new MySqlParameter(
+                            "iv",
+                            report.IV
+                        );
+                        MySqlParameter saltParam = new MySqlParameter(
+                            "salt",
+                            report.Salt
+                        );
+
+                        // Check if email is null, and set the parameter accordingly
+                        MySqlParameter emailParam;
+                        if (string.IsNullOrEmpty(report.Email))
+                        {
+                            emailParam = new MySqlParameter("email", DBNull.Value);
+                        }
+                        else
+                        {
+                            emailParam = new MySqlParameter("email", report.Email);
+                        }
+
+                        // Adds the parameters to the command
+                        command.Parameters.Add(industryIDParam);
+                        command.Parameters.Add(companyNameParam);
+                        command.Parameters.Add(descriptionParam);
+                        command.Parameters.Add(emailParam);
+                        command.Parameters.Add(keyParam);
+                        command.Parameters.Add(IVParam);
+                        command.Parameters.Add(saltParam);
+
+                        // Call Prepare after setting the Commandtext and Parameters.
+                        command.Prepare();
+
+                        // Execute the query
+                        object result = command.ExecuteScalar();
+
+                        // Return true if no exceptions are thrown
+                        return true;
+                    }
+                    catch (MySqlException ex)
+                    {
+                        // Handle the exception (e.g., log it) and return false
+                        // You may want to implement secure logging to store the error message
+                        Console.WriteLine($"Error executing query: {ex.Message}");
+                        return false;
+                    }
+                    finally
+                    {
+                        // Close the connection at the end
+                        dbConnection.CloseConnection();
+                        Console.WriteLine("Connection closed.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception if opening the connection fails
+                Console.WriteLine($"Error opening connection: {ex.Message}");
+                return false;
+            }
+        }
+
+
+
+
+
     }
 }
