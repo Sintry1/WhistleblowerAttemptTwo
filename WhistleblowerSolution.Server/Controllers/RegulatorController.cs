@@ -144,7 +144,7 @@ namespace WhistleblowerSolution.Server.Controllers
     public class LoginRequest
     {
         public bool UsernameCheck { get; set; }
-        public string industryName { get; set; }
         public bool PasswordCheck { get; set; }
+        public string industryName { get; set; }
     }
 }
