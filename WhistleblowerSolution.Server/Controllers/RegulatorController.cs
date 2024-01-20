@@ -62,7 +62,8 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("login")]
+        [AllowAnonymous]
         public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
             // Check if the provided username matches a predefined value
