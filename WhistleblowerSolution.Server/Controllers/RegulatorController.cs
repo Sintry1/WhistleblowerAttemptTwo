@@ -20,6 +20,7 @@ namespace WhistleblowerSolution.Server.Controllers
 
 
         [HttpGet("GetPublicKey/{industryName}")]
+        [AllowAnonymous]
         public IActionResult FindIvFromRegulatorIndustryName(string industryName)
         {
             try
@@ -38,6 +39,7 @@ namespace WhistleblowerSolution.Server.Controllers
 
 
         [HttpPost("createRegulator")]
+        [AllowAnonymous]
         public IActionResult CreateRegulator([FromBody] Regulator regulator)
         {
             try
@@ -61,6 +63,7 @@ namespace WhistleblowerSolution.Server.Controllers
 
 
         [HttpPost]
+        [AllowAnonymous]
         public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
             // Check if the provided username matches a predefined value
@@ -108,6 +111,7 @@ namespace WhistleblowerSolution.Server.Controllers
 
 
         [HttpPost("PasswordCheck/{industryName}")]
+        [AllowAnonymous]
         public IActionResult GetPassword(string industryName)
         {
             try
@@ -125,6 +129,7 @@ namespace WhistleblowerSolution.Server.Controllers
 
 
         [HttpGet("UsernameCheck/{industryName}")]
+        [AllowAnonymous]
         public IActionResult GetUserName(string industryName)
         {
             try

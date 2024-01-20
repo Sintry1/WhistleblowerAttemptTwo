@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WhistleblowerSolution.Server.Database;
 using static Mysqlx.Error.Types;
 
@@ -15,6 +16,7 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
         [HttpPost("sendReport")]
+        [AllowAnonymous]
         public IActionResult SendReport([FromBody] Report reportRequest)
         {
             try

@@ -55,6 +55,7 @@ app.UseCors("AllowMyOrigin");
 
 app.UseRouting();
 
+// JWT Authentication middleware
 app.UseAuthentication();
 app.UseAuthorization();
 
