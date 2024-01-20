@@ -1,17 +1,102 @@
 import JSEncrypt from "jsencrypt";
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import Bcrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
+import { Link, useNavigate } from "react-router-dom";
+
 
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [industry, setIndustry] = useState("");
 
-  const checkPassword = () => {
-    
-  }
+  const navigate = useNavigate();
 
+  const host = "htpp://localhost:5090/";
+
+  const encrypt = new JSEncrypt({ default_key_size: 2048 });
+
+  const checkPassword = async (password, industry) => {
+    const storedPassword = await fetch(
+      `${host}api/Regulator/passwordCheck/${industry}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await storedPassword.json();
+    return bcrypt.compareSync(password, data.hashedPassword);
+  };
+
+  const checkUsername = async (username, industry) => {
+    const storedUsername = await fetch(
+      `${host}api/Regulator/UsernameCheck/${industry}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    const data = await storedUsername.json();
+
+    // Wrap the file reading operation in a Promise
+    return new Promise((resolve, reject) => {
+      // Prompt user to upload file contents
+      const fileInput = document.createElement("input");
+      fileInput.type = "file";
+      fileInput.accept = ".txt"; // Specify the accepted file type(s) here
+      fileInput.addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          // Process the file contents here
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const fileContents = e.target.result;
+            // Set the private key with the file contents
+            encrypt.setPrivateKey(fileContents);
+            // Decrypt the username after setting the private key
+            const decryptedUsername = encrypt.decrypt(data.username);
+            // Compare the decrypted username with the input username
+            resolve(username === decryptedUsername);
+          };
+          reader.readAsText(file);
+        } else {
+          reject(new Error("Failed to load file"));
+        }
+      });
+      fileInput.click();
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      // Check if user exists
+      if (!await checkUsername(username, industry)) {
+        throw new Error("Industry does not match");
+      }  
+      
+      // Check if password matches
+      if (!await checkPassword(password, industry)) {
+        throw new Error("There was an error logging in, please try again");
+      }
+      navigate("/reports");
+      // if password matches, login by redirecting to reports page
+      // when redirected to reports page, pass industry and username in sessionStorage
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const handleUsernameChange = (e) => {
+    setUsername(e.target.value);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+  };
 
   return (
     <div>

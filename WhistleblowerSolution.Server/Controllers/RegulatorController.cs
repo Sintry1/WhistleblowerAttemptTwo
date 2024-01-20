@@ -60,7 +60,7 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
 
-        [HttpPost]
+        [HttpPost("login")]
         public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
             // Check if the provided username matches a predefined value
@@ -129,9 +129,9 @@ namespace WhistleblowerSolution.Server.Controllers
         {
             try
             {
-                string hashedPassword = ps.GetUserName(industryName);
+                string username = ps.GetUserName(industryName);
 
-                return Ok(new { Success = true, HashedPassword = hashedPassword });
+                return Ok(new { Success = true, UserName = username });
             }
             catch (Exception ex)
             {
