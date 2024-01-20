@@ -8,9 +8,9 @@ export default function Register() {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [industry, setIndustry] = useState("");
 
-  const host = "http://localhost:5090/";
+  const host = "http://localhost:5241/";
 
-  const encrypt = JSEncrypt({ default_key_size: 2048 });
+  const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
   const hashPassword = (password) => {
     const salt = bcrypt.genSaltSync(10);
@@ -49,7 +49,7 @@ export default function Register() {
     return derivedKey;
   };
 
-  const encryptValue = async (input, encryptionKey) => {
+  const encryptValues = async (inputs, encryptionKey) => {
     const keyMaterial = await crypto.subtle.exportKey("raw", encryptionKey);
 
     let salt = crypto.getRandomValues(new Uint8Array(16));
@@ -74,16 +74,20 @@ export default function Register() {
     );
 
     const iv = crypto.getRandomValues(new Uint8Array(16));
-    const cipher = await crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      new TextEncoder().encode(input)
+    const ciphers = await Promise.all(
+      inputs.map((input) =>
+        crypto.subtle.encrypt(
+          { name: "AES-GCM", iv: iv },
+          key,
+          new TextEncoder().encode(input)
+        )
+      )
     );
 
     return {
       iv: iv,
       salt: salt,
-      input: new Uint8Array(cipher),
+      inputs: ciphers.map((cipher) => new Uint8Array(cipher)),
     };
   };
 
@@ -105,31 +109,17 @@ export default function Register() {
 
   const registerRegulator = async (email, password, industry) => {
     const hashedPassword = hashPassword(password);
-    let encryptionKey = await deriveKey();
-    let encryptedUser = await encryptValue(email, encryptionKey);
-    let encryptedUsernameString = btoa(
-      String.fromCharCode.apply(null, encryptedUser.input)
-    );
-    let encryptedUserIvString = btoa(
-      String.fromCharCode.apply(null, encryptedUser.iv)
-    );
-    let encryptedUserSaltString = btoa(
-      String.fromCharCode.apply(null, encryptedUser.salt)
-    );
-    let encryptedUsername = encrypt.encrypt(encryptedUsernameString);
-    let encryptedIV = encrypt.encrypt(encryptedUserIvString);
-    let encryptedSalt = encrypt.encrypt(encryptedUserSaltString);
+
+    let encryptedUser = encrypt.encrypt(email);
 
     let response;
     try {
       response = await fetch(`${host}api/Regulator/createRegulator`, {
         method: "POST",
         body: JSON.stringify({
-          Username: encryptedUsername,
+          UserName: encryptedUser,
           HashedPassword: hashedPassword,
           IndustryName: industry,
-          Iv: encryptedIV,
-          Salt: encryptedSalt,
           PublicKey: encrypt.getPublicKey(),
         }),
         headers: {
@@ -146,6 +136,18 @@ export default function Register() {
     }
     const data = await response.json();
     return data;
+  };
+
+  const downloadPrivateKey = (industry) => {
+    const privateKey = encrypt.getPrivateKey();
+    const blob = new Blob([privateKey], { type: "text/plain;charset=utf-8" });
+    const href = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = href;
+    link.download = `${industry}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const handleRegister = async (e) => {
@@ -166,6 +168,7 @@ export default function Register() {
       return;
     }
 
+    downloadPrivateKey(industry);
     registerRegulator(email, password, industry);
 
     // Reset form fields
