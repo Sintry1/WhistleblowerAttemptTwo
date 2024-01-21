@@ -35,6 +35,9 @@ namespace WhistleblowerSolution.Server.Database
                     Env.GetString("OTHER_READER_PASSWORD")
                 );
 
+
+                Console.WriteLine(Env.GetString("OTHER_READER_NAME") +" lol" + Env.GetString("OTHER_READER_PASSWORD"));
+
                 // Use MySqlConnection to open the connection and throw an exception if it fails
                 using (MySqlConnection connection = dbConnection.OpenConnection())
                 {
@@ -103,6 +106,7 @@ namespace WhistleblowerSolution.Server.Database
                     Env.GetString("OTHER_READER_PASSWORD")
                 );
 
+
                 // Use MySqlConnection to open the connection and throw an exception if it fails
                 using (MySqlConnection connection = dbConnection.OpenConnection())
                 {
@@ -163,47 +167,39 @@ public void CreateRegulator(Regulator regulator)
     int industryId = GetIndustryID(regulator.IndustryName);
     Console.WriteLine($"Industry ID: {industryId}");
 
-    Console.WriteLine("Setting connection credentials...");
-    dbConnection.SetConnectionCredentials(
-        Env.GetString("REGULATOR_WRITER_NAME"),
-        Env.GetString("REGULATOR_WRITER_PASSWORD")
-    );
-    Console.WriteLine("Credentials set.");
 
-    Console.WriteLine("Opening connection...");
-    using (MySqlConnection connection = dbConnection.OpenConnection())
-    {
-        Console.WriteLine("Connection opened.");
+            Console.WriteLine("username passed to SetConnectionCredentials:" + Env.GetString("REGULATOR_WRITER_NAME") + ", password passed to SetConnectionCredentials: " + Env.GetString("REGULATOR_WRITER_PASSWORD"));
 
-        try
-        {
-            Console.WriteLine("Creating MySqlCommand...");
-            MySqlCommand command = new MySqlCommand(null, connection);
-            Console.WriteLine("Command created.");
+            // Set credentials for the user needed
+            dbConnection.SetConnectionCredentials(
+                Env.GetString("REGULATOR_WRITER_NAME"),
+                Env.GetString("REGULATOR_WRITER_PASSWORD")
+            );
 
-            Console.WriteLine("Preparing SQL statement...");
-            command.CommandText =
-                $"INSERT INTO regulators (regulator_name, password, public_key, industry_id) VALUES (@userName, @hash, @publicKey, @industry_id)";
-            Console.WriteLine("SQL statement prepared.");
 
-            Console.WriteLine("Setting MySQL parameters...");
-            MySqlParameter userNameParam = new MySqlParameter("userName", regulator.UserName);
-            MySqlParameter hashParam = new MySqlParameter("hash", regulator.HashedPassword);
-            MySqlParameter publicKeyParam = new MySqlParameter("publicKey", regulator.PublicKey);
-            MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
-            Console.WriteLine("Parameters set.");
-            Console.WriteLine("Parameters: ");
-            Console.WriteLine("userNameParam: " + userNameParam.Value);
-            Console.WriteLine("hashParam: " + hashParam.Value);
-            Console.WriteLine("publicKeyParam: " + publicKeyParam.Value);
-            Console.WriteLine("industryIDParam: " + industryIDParam.Value);
+            //uses mySqlConnection to open the connection and throws an exception if it fails
+            using (MySqlConnection connection = dbConnection.OpenConnection())
+            {
+                try
+                {
+                    //creates an instance of MySqlCommand, a method in the mysql library
+                    MySqlCommand command = new MySqlCommand(null, connection);
 
-            Console.WriteLine("Adding parameters to command...");
-            command.Parameters.Add(userNameParam);
-            command.Parameters.Add(hashParam);
-            command.Parameters.Add(publicKeyParam);
-            command.Parameters.Add(industryIDParam);
-            Console.WriteLine("Parameters added to command.");
+                    // Create and prepare an SQL statement.
+                    command.CommandText =
+                        $"INSERT INTO regulators (regulator_name, password, public_key, industry_id) VALUES (@regulator_name, @password, @public_key, @industry_id)";
+
+                    // Sets a mySQL parameter for the prepared statement
+                    MySqlParameter userNameParam = new MySqlParameter("regulator_name", regulator.UserName);
+                    MySqlParameter hashParam = new MySqlParameter("password", regulator.HashedPassword);
+                    MySqlParameter publicKeyParam = new MySqlParameter("public_key", regulator.PublicKey);
+                    MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
+
+                    // Adds the parameter to the command
+                    command.Parameters.Add(userNameParam);
+                    command.Parameters.Add(hashParam);
+                    command.Parameters.Add(publicKeyParam);
+                    command.Parameters.Add(industryIDParam);
 
             Console.WriteLine("Preparing command...");
             command.Prepare();
