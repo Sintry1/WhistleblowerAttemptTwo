@@ -5,6 +5,9 @@ using static Mysqlx.Error.Types;
 
 namespace WhistleblowerSolution.Server.Controllers
 {
+
+    [ApiController]
+    [Route("api/[controller]")]
     public class ReportController : Controller
     {
         private readonly PreparedStatements ps;

@@ -587,10 +587,10 @@ namespace WhistleblowerSolution.Server.Database
                     object result = command.ExecuteScalar();
 
                     //Casts the result to string
-                    string storedHash = result.ToString();
+                    string username = result.ToString();
 
                     //returns the hashed password
-                    return storedHash;
+                    return username;
                 }
                 //executes at the end, no matter if it returned a value before or not
                 finally

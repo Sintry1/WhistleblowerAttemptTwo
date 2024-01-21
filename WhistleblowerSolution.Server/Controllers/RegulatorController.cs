@@ -1,11 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WhistleblowerSolution.Server.Database;
-using static Mysqlx.Error.Types;
 
 
 namespace WhistleblowerSolution.Server.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class RegulatorController : Controller
     {
         private readonly JwtService jwtService;
