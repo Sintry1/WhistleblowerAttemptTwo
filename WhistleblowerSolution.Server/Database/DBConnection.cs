@@ -32,7 +32,9 @@ namespace WhistleblowerSolution.Server.Database
         // Set the connection credentials dynamically
         public void SetConnectionCredentials(string username, string password)
         {
+            Console.WriteLine("username received in SetConnectionCredentials: " + username + ", password received in SetConnectionCredentials:" + password);
             userCredentials = $"User ID={username};Password={password};";
+            Console.WriteLine("string for userCredentials in SetConnectionCredentials: " + userCredentials);
         }
 
         public static DBConnection CreateInstance()
@@ -47,8 +49,24 @@ namespace WhistleblowerSolution.Server.Database
             //tries to execute code
             try
             {
+
+                Console.WriteLine("userCredentials when opening connection: " + userCredentials);
                 // Concatenate the server connection string and user credentials
                 connection.ConnectionString = $"{serverConnectionString}{userCredentials}";
+                Console.WriteLine(connection.ConnectionString);
+
+                Console.WriteLine("server connection string: " + serverConnectionString);
+
+                // Create a new connection if it has been disposed
+                if (connection == null || connection.State == System.Data.ConnectionState.Closed)
+                {
+                    Console.WriteLine("connection string was null due to unknown dispose, so creating new connection");
+                    connection = new MySqlConnection($"{serverConnectionString};{userCredentials}");
+                    Console.WriteLine(connection);
+                    Console.WriteLine($"{serverConnectionString};{userCredentials}");
+                }
+                else
+                { Console.WriteLine("connection exists"); }
 
                 //checks if the connection already is open
                 if (connection.State != System.Data.ConnectionState.Open)
@@ -56,12 +74,14 @@ namespace WhistleblowerSolution.Server.Database
                     //opens connection if connection isn't open
                     connection.Open();
                 }
+                else { Console.WriteLine("Old connection is still open"); }
                 //returns connection
                 return connection;
             }
             //catches exeptions and returns null
             catch (Exception ex)
             {
+                Console.WriteLine($"Error opening connection: {ex.Message}");
                 // Handle exceptions as needed
                 //Console.WriteLine($"Error opening connection: {ex.Message}"); Need more secure way of handling error
                 return null;

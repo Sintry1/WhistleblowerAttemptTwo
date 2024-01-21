@@ -5,16 +5,16 @@
         // Properties
         public string UserName { get; private set; }
         public string HashedPassword { get; private set; }
-        public string PublicKey { get; private set; }
         public string IndustryName { get; private set; }
+        public string PublicKey { get; private set; }
 
         // Constructor
-        public Regulator(string userName, string hashedPassword, string publicKey, string industryName)
+        public Regulator(string userName, string hashedPassword, string industryName, string publicKey)
         {
             UserName = userName;
             HashedPassword = hashedPassword;
-            PublicKey = publicKey;
             IndustryName = industryName;
+            PublicKey = publicKey;   
         }
     }
 

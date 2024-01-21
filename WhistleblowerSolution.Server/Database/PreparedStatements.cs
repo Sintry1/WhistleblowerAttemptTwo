@@ -35,6 +35,9 @@ namespace WhistleblowerSolution.Server.Database
                     Env.GetString("OTHER_READER_PASSWORD")
                 );
 
+
+                Console.WriteLine(Env.GetString("OTHER_READER_NAME") +" lol" + Env.GetString("OTHER_READER_PASSWORD"));
+
                 // Use MySqlConnection to open the connection and throw an exception if it fails
                 using (MySqlConnection connection = dbConnection.OpenConnection())
                 {
@@ -103,6 +106,7 @@ namespace WhistleblowerSolution.Server.Database
                     Env.GetString("OTHER_READER_PASSWORD")
                 );
 
+
                 // Use MySqlConnection to open the connection and throw an exception if it fails
                 using (MySqlConnection connection = dbConnection.OpenConnection())
                 {
@@ -160,11 +164,16 @@ namespace WhistleblowerSolution.Server.Database
             //Calls another prepared statement to get the industry ID from the industry name
             int industryId = GetIndustryID(regulator.IndustryName);
 
-            //Set credentials for the user needed
+
+            Console.WriteLine("username passed to SetConnectionCredentials:" + Env.GetString("REGULATOR_WRITER_NAME") + ", password passed to SetConnectionCredentials: " + Env.GetString("REGULATOR_WRITER_PASSWORD"));
+
+            // Set credentials for the user needed
             dbConnection.SetConnectionCredentials(
                 Env.GetString("REGULATOR_WRITER_NAME"),
                 Env.GetString("REGULATOR_WRITER_PASSWORD")
             );
+
+
             //uses mySqlConnection to open the connection and throws an exception if it fails
             using (MySqlConnection connection = dbConnection.OpenConnection())
             {
@@ -175,12 +184,12 @@ namespace WhistleblowerSolution.Server.Database
 
                     // Create and prepare an SQL statement.
                     command.CommandText =
-                        $"INSERT INTO regulators (regulator_name, password, public_key, industry_id) VALUES (@userName, @hash, @publicKey, @industry_id)";
+                        $"INSERT INTO regulators (regulator_name, password, public_key, industry_id) VALUES (@regulator_name, @password, @public_key, @industry_id)";
 
                     // Sets a mySQL parameter for the prepared statement
-                    MySqlParameter userNameParam = new MySqlParameter("userName", regulator.UserName);
-                    MySqlParameter hashParam = new MySqlParameter("hash", regulator.HashedPassword);
-                    MySqlParameter publicKeyParam = new MySqlParameter("publicKey", regulator.PublicKey);
+                    MySqlParameter userNameParam = new MySqlParameter("regulator_name", regulator.UserName);
+                    MySqlParameter hashParam = new MySqlParameter("password", regulator.HashedPassword);
+                    MySqlParameter publicKeyParam = new MySqlParameter("public_key", regulator.PublicKey);
                     MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
 
                     // Adds the parameter to the command
