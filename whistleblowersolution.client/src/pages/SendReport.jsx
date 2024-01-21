@@ -3,7 +3,8 @@ import "./SendReport.css";
 import JSEncrypt from "jsencrypt";
 
 export default function SendReport() {
-  const host = "http://localhost:5090/";
+  
+  const host = "http://localhost:5241/";
 
   const [industry, setIndustry] = useState("");
   const [companyName, setCompanyName] = useState("");

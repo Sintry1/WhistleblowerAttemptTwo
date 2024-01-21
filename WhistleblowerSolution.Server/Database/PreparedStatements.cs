@@ -155,54 +155,74 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
-        public void CreateRegulator(Regulator regulator)
+public void CreateRegulator(Regulator regulator)
+{
+    Console.WriteLine("Starting CreateRegulator method...");
+
+    Console.WriteLine("Calling GetIndustryID...");
+    int industryId = GetIndustryID(regulator.IndustryName);
+    Console.WriteLine($"Industry ID: {industryId}");
+
+    Console.WriteLine("Setting connection credentials...");
+    dbConnection.SetConnectionCredentials(
+        Env.GetString("REGULATOR_WRITER_NAME"),
+        Env.GetString("REGULATOR_WRITER_PASSWORD")
+    );
+    Console.WriteLine("Credentials set.");
+
+    Console.WriteLine("Opening connection...");
+    using (MySqlConnection connection = dbConnection.OpenConnection())
+    {
+        Console.WriteLine("Connection opened.");
+
+        try
         {
-            //Calls another prepared statement to get the industry ID from the industry name
-            int industryId = GetIndustryID(regulator.IndustryName);
+            Console.WriteLine("Creating MySqlCommand...");
+            MySqlCommand command = new MySqlCommand(null, connection);
+            Console.WriteLine("Command created.");
 
-            //Set credentials for the user needed
-            dbConnection.SetConnectionCredentials(
-                Env.GetString("REGULATOR_WRITER_NAME"),
-                Env.GetString("REGULATOR_WRITER_PASSWORD")
-            );
-            //uses mySqlConnection to open the connection and throws an exception if it fails
-            using (MySqlConnection connection = dbConnection.OpenConnection())
-            {
-                try
-                {
-                    //creates an instance of MySqlCommand, a method in the mysql library
-                    MySqlCommand command = new MySqlCommand(null, connection);
+            Console.WriteLine("Preparing SQL statement...");
+            command.CommandText =
+                $"INSERT INTO regulators (regulator_name, password, public_key, industry_id) VALUES (@userName, @hash, @publicKey, @industry_id)";
+            Console.WriteLine("SQL statement prepared.");
 
-                    // Create and prepare an SQL statement.
-                    command.CommandText =
-                        $"INSERT INTO regulators (regulator_name, password, public_key, industry_id) VALUES (@userName, @hash, @publicKey, @industry_id)";
+            Console.WriteLine("Setting MySQL parameters...");
+            MySqlParameter userNameParam = new MySqlParameter("userName", regulator.UserName);
+            MySqlParameter hashParam = new MySqlParameter("hash", regulator.HashedPassword);
+            MySqlParameter publicKeyParam = new MySqlParameter("publicKey", regulator.PublicKey);
+            MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
+            Console.WriteLine("Parameters set.");
+            Console.WriteLine("Parameters: ");
+            Console.WriteLine("userNameParam: " + userNameParam.Value);
+            Console.WriteLine("hashParam: " + hashParam.Value);
+            Console.WriteLine("publicKeyParam: " + publicKeyParam.Value);
+            Console.WriteLine("industryIDParam: " + industryIDParam.Value);
 
-                    // Sets a mySQL parameter for the prepared statement
-                    MySqlParameter userNameParam = new MySqlParameter("userName", regulator.UserName);
-                    MySqlParameter hashParam = new MySqlParameter("hash", regulator.HashedPassword);
-                    MySqlParameter publicKeyParam = new MySqlParameter("publicKey", regulator.PublicKey);
-                    MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
+            Console.WriteLine("Adding parameters to command...");
+            command.Parameters.Add(userNameParam);
+            command.Parameters.Add(hashParam);
+            command.Parameters.Add(publicKeyParam);
+            command.Parameters.Add(industryIDParam);
+            Console.WriteLine("Parameters added to command.");
 
-                    // Adds the parameter to the command
-                    command.Parameters.Add(userNameParam);
-                    command.Parameters.Add(hashParam);
-                    command.Parameters.Add(publicKeyParam);
-                    command.Parameters.Add(industryIDParam);
+            Console.WriteLine("Preparing command...");
+            command.Prepare();
+            Console.WriteLine("Command prepared.");
 
-                    // Call Prepare after setting the Commandtext and Parameters.
-                    command.Prepare();
-
-                    // Execute the query and cast the result to a boolean
-                    command.ExecuteNonQuery();
-                }
-                //executes at the end, no matter if it returned a value before or not
-                finally
-                {
-                    //closes the connection at the VERY end
-                    dbConnection.CloseConnection();
-                }
-            }
+            Console.WriteLine("Executing query...");
+            command.ExecuteNonQuery();
+            Console.WriteLine("Query executed.");
         }
+        finally
+        {
+            Console.WriteLine("Closing connection...");
+            dbConnection.CloseConnection();
+            Console.WriteLine("Connection closed.");
+        }
+    }
+
+    Console.WriteLine("End of CreateRegulator method.");
+}
 
         public bool UserExists(string userName)
         {

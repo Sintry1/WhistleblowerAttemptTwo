@@ -11,7 +11,7 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  const host = "htpp://localhost:5090/";
+  const host = "http://localhost:5241/";
 
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 

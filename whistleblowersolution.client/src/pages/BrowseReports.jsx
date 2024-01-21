@@ -21,7 +21,7 @@ export default function Reports() {
     };
   }, []);
 
-  const host = "http://localhost:5090/";
+  const host = "http://localhost:5241/";
 
   const fetchReports = async () => {
     const industry = sessionStorage.getItem("Industry");

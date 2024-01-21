@@ -172,7 +172,7 @@ export default function Register() {
     registerRegulator(email, password, industry);
 
     // Reset form fields
-    setEmail("");
+    // setEmail("");
     setPassword("");
     setRepeatPassword("");
     setIndustry("");
