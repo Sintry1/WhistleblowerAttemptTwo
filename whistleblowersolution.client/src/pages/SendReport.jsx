@@ -1,15 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import "./SendReport.css";
 import JSEncrypt from "jsencrypt";
 
 export default function SendReport() {
   const host = "http://localhost:5090/";
-  useEffect(() => {}, []);
 
   const [industry, setIndustry] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [reportDetails, setReportDetails] = useState("");
-  const [email, setEmail] = useState("");
+  // const [email, setEmail] = useState("");
 
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
@@ -88,7 +87,6 @@ export default function SendReport() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    encrypt.setPublicKey;
 
     let publicKey = await fetch(
       `${host}api/Regulator/GetPublicKey/${industry}`,
@@ -146,7 +144,7 @@ export default function SendReport() {
         Key: encrypt.encrypt(encryptionKey),
         CompanyName: encryptedCompanyString,
         Description: encryptedReportString,
-        Email: email,
+        // Email: email,
       }),
     }).then((res) => res.json());
   };
@@ -192,7 +190,7 @@ export default function SendReport() {
             placeholder="Description"
           ></textarea>
         </div>
-        <div>
+        {/* <div>
           <label htmlFor="email">Email (Optional)</label>
           <input
             onChange={(e) => setEmail(e.target.value)}
@@ -201,7 +199,7 @@ export default function SendReport() {
             type="email"
             placeholder="Email (optional)"
           />
-        </div>
+        </div> */}
         <button type="submit">Send</button>
       </form>
     </div>
