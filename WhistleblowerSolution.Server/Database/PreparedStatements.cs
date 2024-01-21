@@ -25,7 +25,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //for getting industry ID from industry name
-        internal int GetIndustryID(string industryName)
+        public int GetIndustryID(string industryName)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //fetching publickey
-        internal string GetPublicKey(string industryName)
+        public string GetPublicKey(string industryName)
         {
             try
             {
@@ -155,7 +155,7 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
-        internal void CreateRegulator(Regulator regulator)
+        public void CreateRegulator(Regulator regulator)
         {
             //Calls another prepared statement to get the industry ID from the industry name
             int industryId = GetIndustryID(regulator.IndustryName);
@@ -204,7 +204,7 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
-        internal bool UserExists(string userName)
+        public bool UserExists(string userName)
         {
             dbConnection.SetConnectionCredentials(Env.GetString("OTHER_READER_NAME"), Env.GetString("OTHER_READER_PASSWORD"));
 
@@ -252,7 +252,7 @@ namespace WhistleblowerSolution.Server.Database
         }
 
         //Gets userId from userName
-        internal int GetUserID(string industryName)
+        public int GetUserID(string industryName)
         {
             //Calls another prepared statement to get the industry ID from the industry name
             int industryId = GetIndustryID(industryName);
@@ -318,7 +318,7 @@ namespace WhistleblowerSolution.Server.Database
             }
         }
 
-        internal List<Report> RetrieveReports(string industryName)
+        public List<Report> RetrieveReports(string industryName)
         {
             List<Report> reports = new List<Report>();
 
