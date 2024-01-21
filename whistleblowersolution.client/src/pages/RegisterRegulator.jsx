@@ -18,78 +18,78 @@ export default function Register() {
     return hashedPassword;
   };
 
-  const deriveKey = async () => {
-    let key = crypto.getRandomValues(new Uint8Array(32));
+  // const deriveKey = async () => {
+  //   let key = crypto.getRandomValues(new Uint8Array(32));
 
-    let salt = crypto.getRandomValues(new Uint8Array(16));
+  //   let salt = crypto.getRandomValues(new Uint8Array(16));
 
-    const encodedKey = new TextEncoder().encode(key);
+  //   const encodedKey = new TextEncoder().encode(key);
 
-    const keyMat = await crypto.subtle.importKey(
-      "raw",
-      encodedKey,
-      { name: "PBKDF2" },
-      false,
-      ["deriveBits", "deriveKey"]
-    );
+  //   const keyMat = await crypto.subtle.importKey(
+  //     "raw",
+  //     encodedKey,
+  //     { name: "PBKDF2" },
+  //     false,
+  //     ["deriveBits", "deriveKey"]
+  //   );
 
-    const derivedKey = await crypto.subtle.deriveKey(
-      {
-        name: "PBKDF2",
-        salt: salt,
-        iterations: 100000,
-        hash: { name: "SHA-256" },
-      },
-      keyMat,
-      { name: "AES-GCM", length: 256 },
-      true,
-      ["encrypt", "decrypt"]
-    );
+  //   const derivedKey = await crypto.subtle.deriveKey(
+  //     {
+  //       name: "PBKDF2",
+  //       salt: salt,
+  //       iterations: 100000,
+  //       hash: { name: "SHA-256" },
+  //     },
+  //     keyMat,
+  //     { name: "AES-GCM", length: 256 },
+  //     true,
+  //     ["encrypt", "decrypt"]
+  //   );
 
-    return derivedKey;
-  };
+  //   return derivedKey;
+  // };
 
-  const encryptValues = async (inputs, encryptionKey) => {
-    const keyMaterial = await crypto.subtle.exportKey("raw", encryptionKey);
+  // const encryptValues = async (inputs, encryptionKey) => {
+  //   const keyMaterial = await crypto.subtle.exportKey("raw", encryptionKey);
 
-    let salt = crypto.getRandomValues(new Uint8Array(16));
+  //   let salt = crypto.getRandomValues(new Uint8Array(16));
 
-    const key = await crypto.subtle.deriveKey(
-      {
-        name: "PBKDF2",
-        salt: salt,
-        iterations: 100000,
-        hash: { name: "SHA-256" },
-      },
-      await crypto.subtle.importKey(
-        "raw",
-        keyMaterial,
-        { name: "PBKDF2" },
-        false,
-        ["deriveKey"]
-      ),
-      { name: "AES-GCM", length: 256 },
-      true,
-      ["encrypt", "decrypt"]
-    );
+  //   const key = await crypto.subtle.deriveKey(
+  //     {
+  //       name: "PBKDF2",
+  //       salt: salt,
+  //       iterations: 100000,
+  //       hash: { name: "SHA-256" },
+  //     },
+  //     await crypto.subtle.importKey(
+  //       "raw",
+  //       keyMaterial,
+  //       { name: "PBKDF2" },
+  //       false,
+  //       ["deriveKey"]
+  //     ),
+  //     { name: "AES-GCM", length: 256 },
+  //     true,
+  //     ["encrypt", "decrypt"]
+  //   );
 
-    const iv = crypto.getRandomValues(new Uint8Array(16));
-    const ciphers = await Promise.all(
-      inputs.map((input) =>
-        crypto.subtle.encrypt(
-          { name: "AES-GCM", iv: iv },
-          key,
-          new TextEncoder().encode(input)
-        )
-      )
-    );
+  //   const iv = crypto.getRandomValues(new Uint8Array(16));
+  //   const ciphers = await Promise.all(
+  //     inputs.map((input) =>
+  //       crypto.subtle.encrypt(
+  //         { name: "AES-GCM", iv: iv },
+  //         key,
+  //         new TextEncoder().encode(input)
+  //       )
+  //     )
+  //   );
 
-    return {
-      iv: iv,
-      salt: salt,
-      inputs: ciphers.map((cipher) => new Uint8Array(cipher)),
-    };
-  };
+  //   return {
+  //     iv: iv,
+  //     salt: salt,
+  //     inputs: ciphers.map((cipher) => new Uint8Array(cipher)),
+  //   };
+  // };
 
   const handleEmailChange = (e) => {
     setEmail(e.target.value);
