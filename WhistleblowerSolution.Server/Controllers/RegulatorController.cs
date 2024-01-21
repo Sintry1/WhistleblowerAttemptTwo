@@ -22,7 +22,7 @@ namespace WhistleblowerSolution.Server.Controllers
 
         [HttpGet("GetPublicKey/{industryName}")]
         [AllowAnonymous]
-        public IActionResult FindIvFromRegulatorIndustryName(string industryName)
+        public IActionResult GetPublicKey(string industryName)
         {
             try
             {
