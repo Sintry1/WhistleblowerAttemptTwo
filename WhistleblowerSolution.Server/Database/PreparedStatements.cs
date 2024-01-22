@@ -36,7 +36,6 @@ namespace WhistleblowerSolution.Server.Database
                 );
 
 
-                Console.WriteLine(Env.GetString("OTHER_READER_NAME") +" lol" + Env.GetString("OTHER_READER_PASSWORD"));
 
                 // Use MySqlConnection to open the connection and throw an exception if it fails
                 using (MySqlConnection connection = dbConnection.OpenConnection())
