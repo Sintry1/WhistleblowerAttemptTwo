@@ -32,9 +32,8 @@ namespace WhistleblowerSolution.Server.Database
         // Set the connection credentials dynamically
         public void SetConnectionCredentials(string username, string password)
         {
-            Console.WriteLine("username received in SetConnectionCredentials: " + username + ", password received in SetConnectionCredentials:" + password);
             userCredentials = $"User ID={username};Password={password};";
-            Console.WriteLine("string for userCredentials in SetConnectionCredentials: " + userCredentials);
+
         }
 
         public static DBConnection CreateInstance()
@@ -50,12 +49,10 @@ namespace WhistleblowerSolution.Server.Database
             try
             {
 
-                Console.WriteLine("userCredentials when opening connection: " + userCredentials);
+                
                 // Concatenate the server connection string and user credentials
                 connection.ConnectionString = $"{serverConnectionString}{userCredentials}";
-                Console.WriteLine(connection.ConnectionString);
 
-                Console.WriteLine("server connection string: " + serverConnectionString);
 
                 // Create a new connection if it has been disposed
                 if (connection == null || connection.State == System.Data.ConnectionState.Closed)
