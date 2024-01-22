@@ -17,7 +17,7 @@ export default function Login() {
 
   const checkPassword = async (password, industry) => {
     const storedPassword = await fetch(
-      `${host}api/Regulator/passwordCheck/${industry}`,
+      `${host}api/Regulator/PasswordCheck/${industry}`,
       {
         method: "GET",
         headers: {
@@ -26,6 +26,7 @@ export default function Login() {
       }
     );
     const data = await storedPassword.json();
+    console.log("data in checkPassword",data)
     return bcrypt.compareSync(password, data.hashedPassword);
   };
 
@@ -40,7 +41,6 @@ export default function Login() {
       }
     );
     const data = await storedUsername.json();
-    console.log("data in checkUSername",data)
 
     // Wrap the file reading operation in a Promise
     return new Promise((resolve, reject) => {
@@ -58,7 +58,7 @@ export default function Login() {
             // Set the private key with the file contents
             encrypt.setPrivateKey(fileContents);
             // Decrypt the username after setting the private key
-            const decryptedUsername = encrypt.decrypt(data.username);
+            const decryptedUsername = encrypt.decrypt(data.userName);
             // Compare the decrypted username with the input username
             resolve(username === decryptedUsername);
           };
@@ -78,7 +78,7 @@ export default function Login() {
       const usernameMatch = await checkUsername(username, industry);
       // Check if user exists
       if (!usernameMatch) {
-        throw new Error("Industry does not match");
+        throw new Error("Username does not match");
       }  
 
       const passwordMatch = await checkPassword(password, industry);

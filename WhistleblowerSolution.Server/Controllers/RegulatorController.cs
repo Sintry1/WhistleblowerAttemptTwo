@@ -121,7 +121,7 @@ public IActionResult Login([FromBody] LoginRequest loginRequest)
         }
 
 
-        [HttpPost("PasswordCheck/{industryName}")]
+        [HttpGet("PasswordCheck/{industryName}")]
         [AllowAnonymous]
         public IActionResult GetPassword(string industryName)
         {
