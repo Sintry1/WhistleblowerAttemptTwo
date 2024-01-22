@@ -18,7 +18,7 @@ namespace WhistleblowerSolution.Server
             Env.Load();
 
             // Retrieve the secret key from the environment variables
-            secretKey = Env.GetString("secretKey");
+            secretKey = Env.GetString("Secret_Key");
 
             ps = PreparedStatements.CreateInstance();
         }
@@ -29,6 +29,10 @@ namespace WhistleblowerSolution.Server
 
             Env.Load();
 
+            if (industryName == null)
+            {
+                throw new ArgumentNullException(nameof(industryName), "Industry name cannot be null.");
+            }
             //generates key for for credentials
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
 
