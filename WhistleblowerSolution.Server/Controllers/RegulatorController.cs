@@ -63,42 +63,42 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
 
-[HttpPost("login")]
-[AllowAnonymous]
-public IActionResult Login([FromBody] LoginRequest loginRequest)
-{
-    // Check if the provided username matches a predefined value
-    if (loginRequest.UsernameCheck)
-    {
-        if (loginRequest.PasswordCheck) 
-        { 
-            // Generate a JWT token for the authenticated user
-            var token = jwtService.GenerateToken(loginRequest.IndustryName);
-
-            // Create a cookie option
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true, // Make the cookie HttpOnly to prevent access via JavaScript
-                SameSite = SameSiteMode.Strict, // Prevents the browser from sending this cookie along with cross-site requests
-                Expires = DateTime.UtcNow.AddDays(7) // Set the cookie to expire after 7 days
-            };
-
-            // Append the JWT token to the response cookies
-            Response.Cookies.Append("JWT", token, cookieOptions);
-
-            return Ok(new { Token = token });
-        } 
-        else
+        [HttpPost("login")]
+        [AllowAnonymous]
+        public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
-            return Unauthorized("invalid credentials");
+            // Check if the provided username matches a predefined value
+            if (loginRequest.UsernameCheck)
+            {
+                if (loginRequest.PasswordCheck)
+                {
+                    // Generate a JWT token for the authenticated user
+                    var token = jwtService.GenerateToken(loginRequest.IndustryName);
+
+                    // Create a cookie option
+                    var cookieOptions = new CookieOptions
+                    {
+                        HttpOnly = true, // Make the cookie HttpOnly to prevent access via JavaScript
+                        SameSite = SameSiteMode.Strict, // Prevents the browser from sending this cookie along with cross-site requests
+                        Expires = DateTime.UtcNow.AddDays(7) // Set the cookie to expire after 7 days
+                    };
+
+                    // Append the JWT token to the response cookies
+                    Response.Cookies.Append("JWT", token, cookieOptions);
+
+                    return Ok(new { Token = token });
+                }
+                else
+                {
+                    return Unauthorized("invalid credentials");
+                }
+            }
+            else
+            {
+                // Unauthorized if the username doesn't match
+                return Unauthorized("Invalid credentials");
+            }
         }
-    }
-    else
-    { 
-        // Unauthorized if the username doesn't match
-        return Unauthorized("Invalid credentials");
-    }
-}
 
 
         [HttpGet("getReports/{industryName}")]
