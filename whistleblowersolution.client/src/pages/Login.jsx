@@ -26,7 +26,6 @@ export default function Login() {
       }
     );
     const data = await storedPassword.json();
-    console.log("data in checkPassword",data)
     return bcrypt.compareSync(password, data.hashedPassword);
   };
 
@@ -80,12 +79,14 @@ export default function Login() {
       if (!usernameMatch) {
         throw new Error("Username does not match");
       }  
+      console.log(usernameMatch)
 
       const passwordMatch = await checkPassword(password, industry);
       // Check if password matches
       if (!passwordMatch) {
         throw new Error("There was an error logging in, please try again");
       }
+      console.log(passwordMatch)
 
       const response = await fetch(`${host}api/Regulator/login`, {
         method: "POST",
