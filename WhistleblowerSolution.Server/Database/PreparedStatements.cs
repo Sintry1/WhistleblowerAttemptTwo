@@ -574,7 +574,7 @@ public void CreateRegulator(Regulator regulator)
 
                     // Create and prepare an SQL statement.
                     command.CommandText =
-                        $"SELECT regulator_name FROM regulators WHERE industry_id = @industryId";
+                        $"SELECT regulator_name FROM regulators WHERE industry_id = @industry_id";
 
                     // Sets a mySQL parameter for the prepared statement
                     MySqlParameter industryIdParam = new MySqlParameter("industry_id", industryId);
