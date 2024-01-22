@@ -63,32 +63,42 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
 
-        [HttpPost("login")]
-        [AllowAnonymous]
-        public IActionResult Login([FromBody] LoginRequest loginRequest)
-        {
-            // Check if the provided username matches a predefined value
-            if (loginRequest.UsernameCheck)
+[HttpPost("login")]
+[AllowAnonymous]
+public IActionResult Login([FromBody] LoginRequest loginRequest)
+{
+    // Check if the provided username matches a predefined value
+    if (loginRequest.UsernameCheck)
+    {
+        if (loginRequest.PasswordCheck) 
+        { 
+            // Generate a JWT token for the authenticated user
+            var token = jwtService.GenerateToken(loginRequest.IndustryName);
+
+            // Create a cookie option
+            var cookieOptions = new CookieOptions
             {
-                if (loginRequest.PasswordCheck) 
-                { 
-                    // Generate a JWT token for the authenticated user
-                    var token = jwtService.GenerateToken(loginRequest.industryName);
+                HttpOnly = true, // Make the cookie HttpOnly to prevent access via JavaScript
+                SameSite = SameSiteMode.Strict, // Prevents the browser from sending this cookie along with cross-site requests
+                Expires = DateTime.UtcNow.AddDays(7) // Set the cookie to expire after 7 days
+            };
 
-                    return Ok(new { Token = token });
-                } 
-                else
-                {
-                    return Unauthorized("invalid credentials");
-                }
-            }
-            else
-            { 
+            // Append the JWT token to the response cookies
+            Response.Cookies.Append("JWT", token, cookieOptions);
 
-                // Unauthorized if the username doesn't match
-                return Unauthorized("Invalid credentials");
-            }
+            return Ok(new { Token = token });
+        } 
+        else
+        {
+            return Unauthorized("invalid credentials");
         }
+    }
+    else
+    { 
+        // Unauthorized if the username doesn't match
+        return Unauthorized("Invalid credentials");
+    }
+}
 
 
         [HttpGet("getReports/{industryName}")]
@@ -129,7 +139,7 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
 
-        [HttpGet("UsernameCheck/{industryName}")]
+        [HttpGet("GetUserName/{industryName}")]
         [AllowAnonymous]
         public IActionResult GetUserName(string industryName)
         {
@@ -151,6 +161,6 @@ namespace WhistleblowerSolution.Server.Controllers
     {
         public bool UsernameCheck { get; set; }
         public bool PasswordCheck { get; set; }
-        public string industryName { get; set; }
+        public string IndustryName { get; set; }
     }
 }

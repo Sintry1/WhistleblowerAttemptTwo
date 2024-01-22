@@ -31,7 +31,7 @@ export default function Login() {
 
   const checkUsername = async (username, industry) => {
     const storedUsername = await fetch(
-      `${host}api/Regulator/UsernameCheck/${industry}`,
+      `${host}api/Regulator/GetUserName/${industry}`,
       {
         method: "GET",
         headers: {
@@ -40,6 +40,7 @@ export default function Login() {
       }
     );
     const data = await storedUsername.json();
+    console.log("data in checkUSername",data)
 
     // Wrap the file reading operation in a Promise
     return new Promise((resolve, reject) => {
@@ -73,16 +74,36 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+
+      const usernameMatch = await checkUsername(username, industry);
       // Check if user exists
-      if (!await checkUsername(username, industry)) {
+      if (!usernameMatch) {
         throw new Error("Industry does not match");
       }  
-      
+
+      const passwordMatch = await checkPassword(password, industry);
       // Check if password matches
-      if (!await checkPassword(password, industry)) {
+      if (!passwordMatch) {
         throw new Error("There was an error logging in, please try again");
       }
-      navigate("/reports");
+
+      const response = await fetch(`${host}api/Regulator/login`, {
+        method: "POST",
+        body: JSON.stringify({
+          UsernameCheck: usernameMatch,
+          PasswordCheck: passwordMatch,
+          IndustryName: industry,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if(response.ok){
+        const data = await response.json();
+        console.log('Token: ', data.token)
+      }
+      // navigate("/reports");
       // if password matches, login by redirecting to reports page
       // when redirected to reports page, pass industry and username in sessionStorage
     } catch (err) {

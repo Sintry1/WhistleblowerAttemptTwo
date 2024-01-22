@@ -5,10 +5,11 @@ import Login from "./pages/Login";
 import Register from "./pages/RegisterRegulator";
 import Reports from "./pages/BrowseReports";
 import SendReport from "./pages/SendReport";
+import Cookies from 'js-cookie';
 
 function PrivateRoute({ children }) {
-  const isAuth = sessionStorage.getItem("User") && sessionStorage.getItem("Industry"); // check if User and Industry exist in sessionStorage
-  return isAuth ? children : <Navigate to="/login" replace />;
+  const token = Cookies.get('JWT')
+  return token ? children : <Navigate to="/login" replace />;
 }
 
 
