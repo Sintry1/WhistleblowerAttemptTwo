@@ -9,7 +9,6 @@ export default function SendReport() {
   const [industry, setIndustry] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [reportDetails, setReportDetails] = useState("");
-  // const [email, setEmail] = useState("");
 
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
@@ -144,8 +143,7 @@ export default function SendReport() {
         Salt: encrypt.encrypt(encryptedSalt),
         Key: encrypt.encrypt(encryptionKey),
         CompanyName: encryptedCompanyString,
-        Description: encryptedReportString,
-        // Email: email,
+        Description: encryptedReportString
       }),
     }).then((res) => res.json());
   };
@@ -191,16 +189,6 @@ export default function SendReport() {
             placeholder="Description"
           ></textarea>
         </div>
-        {/* <div>
-          <label htmlFor="email">Email (Optional)</label>
-          <input
-            onChange={(e) => setEmail(e.target.value)}
-            id="email"
-            className="input"
-            type="email"
-            placeholder="Email (optional)"
-          />
-        </div> */}
         <button type="submit">Send</button>
       </form>
     </div>

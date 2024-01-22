@@ -371,7 +371,6 @@ public void CreateRegulator(Regulator regulator)
                             int reportID = reader.GetInt32("report_id");
                             string companyName = reader.GetString("company_name");
                             string description = reader.GetString("description");
-                            string email = reader.IsDBNull(reader.GetOrdinal("email")) ? null : reader.GetString("email");
                             string key = reader.GetString("key");
                             string iv = reader.GetString("iv");
                             string salt = reader.GetString("salt");
@@ -381,7 +380,6 @@ public void CreateRegulator(Regulator regulator)
                                 industryName,
                                 companyName,
                                 description,
-                                email,
                                 key,
                                 iv,
                                 salt
@@ -437,7 +435,7 @@ public void CreateRegulator(Regulator regulator)
 
                         // Create and prepare an SQL statement.
                         command.CommandText =
-                            $"INSERT INTO reports (industry_id, company_name, description, email, key, iv, salt) VALUES (@industry_id, @company_name, @description, @email, @key, @iv, @salt)";
+                            $"INSERT INTO reports (industry_id, company_name, description, key, iv, salt) VALUES (@industry_id, @company_name, @description, @key, @iv, @salt)";
 
                         // Sets mySQL parameters for the prepared statement
                         MySqlParameter industryIDParam = new MySqlParameter(
@@ -465,22 +463,11 @@ public void CreateRegulator(Regulator regulator)
                             report.Salt
                         );
 
-                        // Check if email is null, and set the parameter accordingly
-                        MySqlParameter emailParam;
-                        if (string.IsNullOrEmpty(report.Email))
-                        {
-                            emailParam = new MySqlParameter("email", DBNull.Value);
-                        }
-                        else
-                        {
-                            emailParam = new MySqlParameter("email", report.Email);
-                        }
 
                         // Adds the parameters to the command
                         command.Parameters.Add(industryIDParam);
                         command.Parameters.Add(companyNameParam);
                         command.Parameters.Add(descriptionParam);
-                        command.Parameters.Add(emailParam);
                         command.Parameters.Add(keyParam);
                         command.Parameters.Add(IVParam);
                         command.Parameters.Add(saltParam);
