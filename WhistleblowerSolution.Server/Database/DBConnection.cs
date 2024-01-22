@@ -57,10 +57,7 @@ namespace WhistleblowerSolution.Server.Database
                 // Create a new connection if it has been disposed
                 if (connection == null || connection.State == System.Data.ConnectionState.Closed)
                 {
-                    Console.WriteLine("connection string was null due to unknown dispose, so creating new connection");
                     connection = new MySqlConnection($"{serverConnectionString};{userCredentials}");
-                    Console.WriteLine(connection);
-                    Console.WriteLine($"{serverConnectionString};{userCredentials}");
                 }
                 else
                 { Console.WriteLine("connection exists"); }
@@ -80,7 +77,6 @@ namespace WhistleblowerSolution.Server.Database
             {
                 Console.WriteLine($"Error opening connection: {ex.Message}");
                 // Handle exceptions as needed
-                //Console.WriteLine($"Error opening connection: {ex.Message}"); Need more secure way of handling error
                 return null;
             }
         }
@@ -100,7 +96,6 @@ namespace WhistleblowerSolution.Server.Database
             catch (Exception ex)
             {
                 // Handle exceptions as needed
-                //Console.WriteLine($"Error closing connection: {ex.Message}"); Need more secure way of handling error
             }
         }
 
