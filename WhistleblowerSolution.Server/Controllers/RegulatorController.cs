@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using WhistleblowerSolution.Server.Database;
 
-
 namespace WhistleblowerSolution.Server.Controllers
 {
     [ApiController]
@@ -18,7 +17,6 @@ namespace WhistleblowerSolution.Server.Controllers
             ps = PreparedStatements.CreateInstance();
             jwtService = new JwtService();
         }
-
 
         [HttpGet("GetPublicKey/{industryName}")]
         [AllowAnonymous]
@@ -37,7 +35,6 @@ namespace WhistleblowerSolution.Server.Controllers
                 return StatusCode(500, new { Success = false, Message = "Internal server error." });
             }
         }
-
 
         [HttpPost("createRegulator")]
         [AllowAnonymous]
@@ -62,50 +59,40 @@ namespace WhistleblowerSolution.Server.Controllers
             }
         }
 
-
-[HttpPost("login")]
+        [HttpPost("login")]
 [AllowAnonymous]
 public IActionResult Login([FromBody] LoginRequest loginRequest)
 {
+
     // Check if the provided username matches a predefined value
     if (loginRequest.UsernameCheck)
     {
-        if (loginRequest.PasswordCheck) 
-        { 
+
+        if (loginRequest.PasswordCheck)
+        {
+
             // Generate a JWT token for the authenticated user
             var token = jwtService.GenerateToken(loginRequest.IndustryName);
 
-            // Create a cookie option
-            var cookieOptions = new CookieOptions
-            {
-                HttpOnly = true, // Make the cookie HttpOnly to prevent access via JavaScript
-                SameSite = SameSiteMode.Strict, // Prevents the browser from sending this cookie along with cross-site requests
-                Expires = DateTime.UtcNow.AddDays(7) // Set the cookie to expire after 7 days
-            };
-
-            // Append the JWT token to the response cookies
-            Response.Cookies.Append("JWT", token, cookieOptions);
-
             return Ok(new { Token = token });
-        } 
+        }
         else
         {
+            Console.WriteLine("Password check failed");
             return Unauthorized("invalid credentials");
         }
     }
     else
-    { 
-        // Unauthorized if the username doesn't match
+    {
+        Console.WriteLine("Username check failed");
         return Unauthorized("Invalid credentials");
     }
 }
-
 
         [HttpGet("getReports/{industryName}")]
         [Authorize]
         public IActionResult RetrieveReports(string industryName)
         {
-
             try
             {
                 string userName = User.FindFirst("unique_name").Value;
@@ -119,7 +106,6 @@ public IActionResult Login([FromBody] LoginRequest loginRequest)
                 return StatusCode(500, new { Success = false, Message = "Internal server error." });
             }
         }
-
 
         [HttpGet("PasswordCheck/{industryName}")]
         [AllowAnonymous]
@@ -138,7 +124,6 @@ public IActionResult Login([FromBody] LoginRequest loginRequest)
             }
         }
 
-
         [HttpGet("GetUserName/{industryName}")]
         [AllowAnonymous]
         public IActionResult GetUserName(string industryName)
@@ -155,8 +140,8 @@ public IActionResult Login([FromBody] LoginRequest loginRequest)
                 return StatusCode(500, new { Success = false, Message = "Internal server error." });
             }
         }
-
     }
+
     public class LoginRequest
     {
         public bool UsernameCheck { get; set; }

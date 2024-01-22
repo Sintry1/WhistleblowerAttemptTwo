@@ -2,7 +2,7 @@ import JSEncrypt from "jsencrypt";
 import { useState } from "react";
 import bcrypt from "bcryptjs";
 import { Link, useNavigate } from "react-router-dom";
-
+import Cookies from "js-cookie";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -73,20 +73,17 @@ export default function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-
       const usernameMatch = await checkUsername(username, industry);
       // Check if user exists
       if (!usernameMatch) {
         throw new Error("Username does not match");
-      }  
-      console.log(usernameMatch)
+      }
 
       const passwordMatch = await checkPassword(password, industry);
       // Check if password matches
       if (!passwordMatch) {
         throw new Error("There was an error logging in, please try again");
       }
-      console.log(passwordMatch)
 
       const response = await fetch(`${host}api/Regulator/login`, {
         method: "POST",
@@ -100,11 +97,11 @@ export default function Login() {
         },
       });
 
-      if(response.ok){
+      if (response.ok) {
         const data = await response.json();
-        console.log('Token: ', data.token)
+        Cookies.set("JWT", data.token);
       }
-      // navigate("/reports");
+      navigate("/reports");
       // if password matches, login by redirecting to reports page
       // when redirected to reports page, pass industry and username in sessionStorage
     } catch (err) {

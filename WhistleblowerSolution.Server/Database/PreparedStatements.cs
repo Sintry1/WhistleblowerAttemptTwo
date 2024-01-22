@@ -98,7 +98,6 @@ namespace WhistleblowerSolution.Server.Database
                 //Calls another prepared statement to get the industry ID from the industry name
                 int industryId = GetIndustryID(industryName);
 
-                Console.WriteLine($"industry name is: {industryName}");
                 // Set credentials for the user needed
                 dbConnection.SetConnectionCredentials(
                     Env.GetString("OTHER_READER_NAME"),
@@ -160,14 +159,8 @@ namespace WhistleblowerSolution.Server.Database
 
 public void CreateRegulator(Regulator regulator)
 {
-    Console.WriteLine("Starting CreateRegulator method...");
-
-    Console.WriteLine("Calling GetIndustryID...");
     int industryId = GetIndustryID(regulator.IndustryName);
-    Console.WriteLine($"Industry ID: {industryId}");
 
-
-            Console.WriteLine("username passed to SetConnectionCredentials:" + Env.GetString("REGULATOR_WRITER_NAME") + ", password passed to SetConnectionCredentials: " + Env.GetString("REGULATOR_WRITER_PASSWORD"));
 
             // Set credentials for the user needed
             dbConnection.SetConnectionCredentials(
@@ -200,23 +193,15 @@ public void CreateRegulator(Regulator regulator)
                     command.Parameters.Add(publicKeyParam);
                     command.Parameters.Add(industryIDParam);
 
-            Console.WriteLine("Preparing command...");
             command.Prepare();
-            Console.WriteLine("Command prepared.");
-
-            Console.WriteLine("Executing query...");
             command.ExecuteNonQuery();
-            Console.WriteLine("Query executed.");
         }
         finally
         {
-            Console.WriteLine("Closing connection...");
             dbConnection.CloseConnection();
             Console.WriteLine("Connection closed.");
         }
     }
-
-    Console.WriteLine("End of CreateRegulator method.");
 }
 
         public bool UserExists(string userName)
