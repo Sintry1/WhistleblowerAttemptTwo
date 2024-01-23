@@ -195,14 +195,14 @@ public void CreateRegulator(Regulator regulator)
 
             command.Prepare();
             command.ExecuteNonQuery();
+                }
+                finally
+                {
+                    dbConnection.CloseConnection();
+                    Console.WriteLine("Connection closed.");
+                }
+            }
         }
-        finally
-        {
-            dbConnection.CloseConnection();
-            Console.WriteLine("Connection closed.");
-        }
-    }
-}
 
         public bool UserExists(string userName)
         {
@@ -419,33 +419,15 @@ public void CreateRegulator(Regulator regulator)
 
                         // Create and prepare an SQL statement.
                         command.CommandText =
-                            $"INSERT INTO reports (industry_id, company_name, description, key, iv, salt) VALUES (@industry_id, @company_name, @description, @key, @iv, @salt)";
+                            $"INSERT INTO reports (industry_id, company_name, description, `key`, iv, salt) VALUES (@industry_id, @company_name, @description, @key, @iv, @salt)";
 
                         // Sets mySQL parameters for the prepared statement
-                        MySqlParameter industryIDParam = new MySqlParameter(
-                            "industry_id",
-                            industryId
-                        );
-                        MySqlParameter companyNameParam = new MySqlParameter(
-                            "company_name",
-                            report.CompanyName
-                        );
-                        MySqlParameter descriptionParam = new MySqlParameter(
-                            "description",
-                            report.Description
-                        );
-                        MySqlParameter keyParam = new MySqlParameter(
-                            "key",
-                            report.Key
-                        );
-                        MySqlParameter IVParam = new MySqlParameter(
-                            "iv",
-                            report.IV
-                        );
-                        MySqlParameter saltParam = new MySqlParameter(
-                            "salt",
-                            report.Salt
-                        );
+                        MySqlParameter industryIDParam = new MySqlParameter("industry_id", industryId);
+                        MySqlParameter companyNameParam = new MySqlParameter("company_name", report.CompanyName);
+                        MySqlParameter descriptionParam = new MySqlParameter("description", report.Description);
+                        MySqlParameter keyParam = new MySqlParameter("key", report.Key);
+                        MySqlParameter IVParam = new MySqlParameter("iv", report.IV);
+                        MySqlParameter saltParam = new MySqlParameter("salt", report.Salt);
 
 
                         // Adds the parameters to the command

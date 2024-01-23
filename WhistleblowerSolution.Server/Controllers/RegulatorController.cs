@@ -60,34 +60,34 @@ namespace WhistleblowerSolution.Server.Controllers
         }
 
         [HttpPost("login")]
-[AllowAnonymous]
-public IActionResult Login([FromBody] LoginRequest loginRequest)
-{
-
-    // Check if the provided username matches a predefined value
-    if (loginRequest.UsernameCheck)
-    {
-
-        if (loginRequest.PasswordCheck)
+        [AllowAnonymous]
+        public IActionResult Login([FromBody] LoginRequest loginRequest)
         {
 
-            // Generate a JWT token for the authenticated user
-            var token = jwtService.GenerateToken(loginRequest.IndustryName);
+            // Check if the provided username matches a predefined value
+            if (loginRequest.UsernameCheck)
+            {
 
-            return Ok(new { Token = token });
+                if (loginRequest.PasswordCheck)
+                {
+
+                    // Generate a JWT token for the authenticated user
+                    var token = jwtService.GenerateToken(loginRequest.IndustryName);
+
+                    return Ok(new { Token = token });
+                }
+                else
+                {
+                    Console.WriteLine("Password check failed");
+                    return Unauthorized("invalid credentials");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Username check failed");
+                return Unauthorized("Invalid credentials");
+            }
         }
-        else
-        {
-            Console.WriteLine("Password check failed");
-            return Unauthorized("invalid credentials");
-        }
-    }
-    else
-    {
-        Console.WriteLine("Username check failed");
-        return Unauthorized("Invalid credentials");
-    }
-}
 
         [HttpGet("getReports/{industryName}")]
         [Authorize]
