@@ -29,7 +29,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Env.GetString("Secret_Key"))),
-
+            
             // Set the valid issuer and audience for your application
             ValidIssuer = "WhistleblowerSolution",
             ValidAudience = "Regulators"

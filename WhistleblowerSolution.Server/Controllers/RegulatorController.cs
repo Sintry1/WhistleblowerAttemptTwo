@@ -95,13 +95,13 @@ namespace WhistleblowerSolution.Server.Controllers
         {
             try
             {
-                string userName = User.FindFirst("unique_name").Value;
                 List<Report> reports = ps.RetrieveReports(industryName);
 
                 return Ok(new { Success = true, Reports = reports });
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex.Message);
                 // Log the exception for debugging purposes
                 return StatusCode(500, new { Success = false, Message = "Internal server error." });
             }
