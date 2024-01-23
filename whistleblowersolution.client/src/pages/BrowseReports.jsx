@@ -1,45 +1,46 @@
 import { useEffect, useState } from "react";
 import "./BrowseReports.css";
+import Cookies from "js-cookie";
+import { jwtDecode } from "jwt-decode";
 
 export default function Reports() {
   const [decryptedReports, setDecryptedReports] = useState([]);
 
   useEffect(() => {
-    // Add event listener for beforeunload
-    window.addEventListener("beforeunload", () => {
-      // Clears sessionStorage on any sort of navigation away from the page, so that the user has to log in again whenever they navigate away.
-      sessionStorage.clear();
-    });
-
-    // Fetch reports from the database
-    fetchReports();
-
-    // Cleanup
-    return () => {
-      // Remove event listener when the component unmounts
-      window.removeEventListener("beforeunload", () => {});
-    };
+    const token = Cookies.get("JWT");
+    if (token) {
+      const decodedToken = jwtDecode(token);
+      fetchReports(decodedToken.unique_name);
+    }
   }, []);
 
   const host = "http://localhost:5241/";
 
-  const fetchReports = async () => {
-    const industry = sessionStorage.getItem("Industry");
-    const user = sessionStorage.getItem("User");
+  const fetchReports = async (industry) => {
     try {
-      const response = await fetch(`${host}api/Report/getReports/${industry}`, {
-        method: "GET",
-        headers: {
-          "name-Header": user,
-          "Content-Type": "application/json",
-        },
-      });
-      const data = await response.json();
+      const response = await fetch(
+        `${host}api/Regulator/getReports/${industry}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${Cookies.get("JWT")}`,
+          },
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      if (response.status !== 204) { // Check if the response is not No Content
+        const data = await response.json();
+        console.log("Data", data);
+      }
     } catch (error) {
       console.error("Error fetching reports:", error);
     }
   };
-
 
   return (
     <div>

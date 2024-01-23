@@ -79,9 +79,9 @@ export default function SendReport() {
     );
 
     return {
-      iv: iv,
-      salt: salt,
-      inputs: ciphers.map((cipher) => new Uint8Array(cipher)),
+      iv: Array.from(iv),
+      salt: Array.fromsalt,
+      inputs: ciphers.map((cipher) => ({ data: Array.from(new Uint8Array(cipher)) })),
     };
   };
 
@@ -100,6 +100,8 @@ export default function SendReport() {
       .then((res) => res.json())
       .then((res) => res.publicKey);
 
+
+      
     encrypt.setPublicKey(publicKey);
     let encryptionKey = await deriveKey();
     let encryptedData = await encryptValues(
@@ -132,7 +134,6 @@ export default function SendReport() {
       alert("Please enter a report description");
       return;
     }
-
     // Send report using Axios
     await fetch(`${host}api/Report/sendReport`, {
       method: "POST",

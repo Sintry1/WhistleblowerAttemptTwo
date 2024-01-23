@@ -103,7 +103,6 @@ export default function Login() {
       }
       navigate("/reports");
       // if password matches, login by redirecting to reports page
-      // when redirected to reports page, pass industry and username in sessionStorage
     } catch (err) {
       console.log(err);
     }
