@@ -1,0 +1,19 @@
+table {
+    width: 900px; /* Total width of the table */
+    border-radius: 5px;
+  }
+  
+  .narrowcolumn {
+    width: 200px; /* Width of column one and two */
+    background-color: gray;
+  }
+  
+  .widecolumn {
+    width: 500px; /* Width of column three */
+    background-color: gray;
+  }
+  
+  .column {
+    background-color: gray;
+  }
+  

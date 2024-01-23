@@ -80,7 +80,7 @@ export default function SendReport() {
 
     return {
       iv: Array.from(iv),
-      salt: Array.fromsalt,
+      salt: Array.from(salt),
       inputs: ciphers.map((cipher) => ({ data: Array.from(new Uint8Array(cipher)) })),
     };
   };
