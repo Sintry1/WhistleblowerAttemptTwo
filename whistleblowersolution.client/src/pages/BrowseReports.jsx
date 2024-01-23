@@ -39,7 +39,7 @@ export default function Reports() {
         // Check if the response is not No Content
         const data = await response.json();
         setReports(data.reports);
-        console.log("Data", data.reports[0]);
+        console.log("Data", reports[0]);
       }
     } catch (error) {
       console.error("Error fetching reports:", error);
@@ -47,8 +47,9 @@ export default function Reports() {
   };
 
   const getPrivateKey = () => {
+    console.log("getPrivateKey started");
     // Get private key from file
-    return new Promise((reject) => {
+    return new Promise((resolve, reject) => {
       // Prompt user to upload file contents
       const fileInput = document.createElement("input");
       fileInput.type = "file";
@@ -62,6 +63,8 @@ export default function Reports() {
             const fileContents = e.target.result;
             // Set the private key with the file contents
             encrypt.setPrivateKey(fileContents);
+            console.log("Private key set");
+            resolve();
           };
           reader.readAsText(file);
         } else {
@@ -71,31 +74,42 @@ export default function Reports() {
       fileInput.click();
     });
   };
-
+  
   const decryptReport = async (reportId) => {
+    console.log("decryptReport started");
+  
     // Get private key from file
     await getPrivateKey();
+  
+    console.log("Reports:", reports);
+    console.log("Report ID:", reportId);
 
     const decryptionKey = encrypt.decrypt(reports[reportId - 1].key);
     let salt = encrypt.decrypt(reports[reportId - 1].salt);
     let iv = encrypt.decrypt(reports[reportId - 1].iv);
-
+  
+    console.log("Decryption key, salt, iv:", decryptionKey, salt, iv);
+  
     try {
       const keyMaterial = await window.crypto.subtle.exportKey(
         "raw",
         decryptionKey
       );
+      console.log("Key material exported");
+  
       salt = new Uint8Array(
         atob(salt)
           .split("")
           .map((char) => char.charCodeAt(0))
       );
-
+  
       iv = new Uint8Array(
         atob(iv)
           .split("")
           .map((char) => char.charCodeAt(0))
       );
+      console.log("Salt and iv converted to Uint8Array");
+  
       const key = await crypto.subtle.deriveKey(
         {
           name: "PBKDF2",
@@ -114,28 +128,36 @@ export default function Reports() {
         true,
         ["encrypt", "decrypt"]
       );
-
-      const encryptedCompanyData = new Uint8Array(reports[reportId - 1].companyName)
-      const encryptedDescriptionData = new Uint8Array(reports[reportId - 1].description)
-
-      
-
+      console.log("Key derived");
+  
+      const encryptedCompanyData = new Uint8Array(
+        reports[reportId - 1].companyName
+      );
+      const encryptedDescriptionData = new Uint8Array(
+        reports[reportId - 1].description
+      );
+      console.log("Encrypted data converted to Uint8Array");
+  
       const decryptedCompanyDataBuffer = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: iv },
         key,
         encryptedCompanyData
       );
-
+      console.log("Company data decrypted");
+  
       const decryptedDescriptionDataBuffer = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: iv },
         key,
         encryptedDescriptionData
       );
-
+      console.log("Description data decrypted");
+  
       const decryptedDataStrings = {
         companyName: new TextDecoder().decode(decryptedCompanyDataBuffer),
-        description: new TextDecoder().decode(decryptedDescriptionDataBuffer)}
-
+        description: new TextDecoder().decode(decryptedDescriptionDataBuffer),
+      };
+      console.log("Decrypted data:", decryptedDataStrings);
+  
       return decryptedDataStrings;
     } catch (error) {
       console.error("Error during decryption:", error);
@@ -157,13 +179,16 @@ export default function Reports() {
           </tr>
         </thead>
         <tbody>
-          {reports.map((report) => (
-            <tr key={report.id}>
+        {reports.map((report) => (
+          console.log("Report:", report),
+            <tr key={report.reportID}>
               <td className="column">{report.industryName}</td>
               <td className="column">{report.companyName}</td>
               <td className="column">{report.description}</td>
               <td className="column">
-                <button>Decrypt report</button>
+                <button onClick={() => decryptReport(report.reportID)}>
+                  Decrypt report
+                </button>
               </td>
             </tr>
           ))}
