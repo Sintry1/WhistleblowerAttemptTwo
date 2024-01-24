@@ -175,7 +175,7 @@ export default function Reports() {
   };
 
   return (
-    <div>
+    <div className="parent-div">
       <table className="table">
         <thead>
           <tr>
@@ -190,10 +190,10 @@ export default function Reports() {
             (report) => (
               (
                 <tr key={report.reportID}>
-                  <td className="column">{report.industryName}</td>
-                  <td className="column">{decryptedReports[report.reportID]?.companyName || report.companyName}</td>
-                  <td className="column">{decryptedReports[report.reportID]?.description || report.description}</td>
-                  <td className="column">
+                  <td className="narrowcolumn">{report.industryName}</td>
+                  <td className="narrowcolumn">{decryptedReports[report.reportID]?.companyName || report.companyName}</td>
+                  <td className="widecolumn">{decryptedReports[report.reportID]?.description || report.description}</td>
+                  <td className="narrowcolumn">
                     <button onClick={() => decryptReport(report.reportID)}>
                       Decrypt report
                     </button>

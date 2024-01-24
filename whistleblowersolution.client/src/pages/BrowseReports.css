@@ -1,19 +1,28 @@
-table {
-    width: 900px; /* Total width of the table */
-    border-radius: 5px;
-  }
-  
-  .narrowcolumn {
-    width: 200px; /* Width of column one and two */
-    background-color: gray;
-  }
-  
-  .widecolumn {
-    width: 500px; /* Width of column three */
-    background-color: gray;
-  }
-  
-  .column {
-    background-color: gray;
-  }
-  
+.parent-div {
+  background-color: grey;
+  display: flex;
+  width: 100%;
+  border-collapse: collapse; /* Add this line */
+}
+
+td, th {
+  border: 1px solid black; /* Add this line */
+}
+
+.table {
+  width: 100%;
+  background-color: grey;
+  table-layout: fixed;
+}
+
+.widecolumn {
+  width: 100%;
+  background-color: grey;
+  word-wrap: break-word;
+}
+
+.narrowcolumn {
+  width: 20%;
+  background-color: grey;
+  word-wrap: break-word;
+}
