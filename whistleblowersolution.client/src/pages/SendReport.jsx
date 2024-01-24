@@ -3,7 +3,6 @@ import "./SendReport.css";
 import JSEncrypt from "jsencrypt";
 
 export default function SendReport() {
-  
   const host = "http://localhost:5241/";
 
   const [industry, setIndustry] = useState("");
@@ -81,8 +80,21 @@ export default function SendReport() {
     return {
       iv: Array.from(iv),
       salt: Array.from(salt),
-      inputs: ciphers.map((cipher) => ({ data: Array.from(new Uint8Array(cipher)) })),
+      inputs: ciphers.map((cipher) => ({
+        data: Array.from(new Uint8Array(cipher)),
+      })),
     };
+  };
+
+  const exportkey = async (cryptoKey) => {
+    const exportedKey = await crypto.subtle.exportKey("raw", cryptoKey);
+    const keyAsUint8Array = new Uint8Array(exportedKey);
+    let keyAsString = "";
+    for (let i = 0; i < keyAsUint8Array.length; i++) {
+      keyAsString += String.fromCharCode(keyAsUint8Array[i]);
+    }
+    const keyAsBase64 = btoa(keyAsString);
+    return keyAsBase64;
   };
 
   const handleSubmit = async (e) => {
@@ -100,12 +112,19 @@ export default function SendReport() {
       .then((res) => res.json())
       .then((res) => res.publicKey);
 
-
-      
     encrypt.setPublicKey(publicKey);
     let encryptionKey = await deriveKey();
     let encryptedData = await encryptValues(
       [reportDetails, companyName],
+      encryptionKey
+    );
+    console.log(
+      "encryptionKey before being passed to exportKey:",
+      encryptionKey
+    );
+    encryptionKey = await exportkey(encryptionKey);
+    console.log(
+      "encryptionKey after being passed to exportKey:",
       encryptionKey
     );
     let encryptedIv = btoa(String.fromCharCode.apply(null, encryptedData.iv));
@@ -144,7 +163,7 @@ export default function SendReport() {
         Salt: encrypt.encrypt(encryptedSalt),
         Key: encrypt.encrypt(encryptionKey),
         CompanyName: encryptedCompanyString,
-        Description: encryptedReportString
+        Description: encryptedReportString,
       }),
     }).then((res) => res.json());
   };

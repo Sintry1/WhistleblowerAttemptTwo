@@ -6,6 +6,7 @@ import JSEncrypt from "jsencrypt";
 
 export default function Reports() {
   const [reports, setReports] = useState([]);
+  const [decryptedReports, setDecryptedReports] = useState({});
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
   useEffect(() => {
@@ -39,15 +40,29 @@ export default function Reports() {
         // Check if the response is not No Content
         const data = await response.json();
         setReports(data.reports);
-        console.log("Data", reports[0]);
       }
     } catch (error) {
       console.error("Error fetching reports:", error);
     }
   };
 
+  const importKey = async (keyString) => {
+    let keyAsBinaryString = atob(keyString);
+    let keyAsArrayBuffer = new Uint8Array(keyAsBinaryString.length);
+    for (let i = 0; i < keyAsBinaryString.length; i++) {
+      keyAsArrayBuffer[i] = keyAsBinaryString.charCodeAt(i);
+    }
+    const importedKey = await crypto.subtle.importKey(
+      "raw",
+      keyAsArrayBuffer,
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["encrypt", "decrypt"]
+    );
+    return importedKey;
+  };
+
   const getPrivateKey = () => {
-    console.log("getPrivateKey started");
     // Get private key from file
     return new Promise((resolve, reject) => {
       // Prompt user to upload file contents
@@ -63,7 +78,6 @@ export default function Reports() {
             const fileContents = e.target.result;
             // Set the private key with the file contents
             encrypt.setPrivateKey(fileContents);
-            console.log("Private key set");
             resolve();
           };
           reader.readAsText(file);
@@ -74,42 +88,34 @@ export default function Reports() {
       fileInput.click();
     });
   };
-  
+
   const decryptReport = async (reportId) => {
-    console.log("decryptReport started");
-  
     // Get private key from file
     await getPrivateKey();
-  
-    console.log("Reports:", reports);
-    console.log("Report ID:", reportId);
-
-    const decryptionKey = encrypt.decrypt(reports[reportId - 1].key);
+    let decryptionKey = encrypt.decrypt(reports[reportId - 1].key);
     let salt = encrypt.decrypt(reports[reportId - 1].salt);
     let iv = encrypt.decrypt(reports[reportId - 1].iv);
-  
-    console.log("Decryption key, salt, iv:", decryptionKey, salt, iv);
-  
+
+    decryptionKey = await importKey(decryptionKey);
+
     try {
       const keyMaterial = await window.crypto.subtle.exportKey(
         "raw",
         decryptionKey
       );
-      console.log("Key material exported");
-  
+
       salt = new Uint8Array(
         atob(salt)
           .split("")
           .map((char) => char.charCodeAt(0))
       );
-  
+
       iv = new Uint8Array(
         atob(iv)
           .split("")
           .map((char) => char.charCodeAt(0))
       );
-      console.log("Salt and iv converted to Uint8Array");
-  
+
       const key = await crypto.subtle.deriveKey(
         {
           name: "PBKDF2",
@@ -128,36 +134,37 @@ export default function Reports() {
         true,
         ["encrypt", "decrypt"]
       );
-      console.log("Key derived");
-  
+
       const encryptedCompanyData = new Uint8Array(
-        reports[reportId - 1].companyName
+        atob(reports[reportId - 1].companyName)
+          .split("")
+          .map((char) => char.charCodeAt(0))
       );
       const encryptedDescriptionData = new Uint8Array(
-        reports[reportId - 1].description
+        atob(reports[reportId - 1].description)
+          .split("")
+          .map((char) => char.charCodeAt(0))
       );
-      console.log("Encrypted data converted to Uint8Array");
-  
+
       const decryptedCompanyDataBuffer = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: iv },
         key,
         encryptedCompanyData
       );
-      console.log("Company data decrypted");
-  
+
       const decryptedDescriptionDataBuffer = await crypto.subtle.decrypt(
         { name: "AES-GCM", iv: iv },
         key,
         encryptedDescriptionData
       );
-      console.log("Description data decrypted");
-  
+
       const decryptedDataStrings = {
         companyName: new TextDecoder().decode(decryptedCompanyDataBuffer),
         description: new TextDecoder().decode(decryptedDescriptionDataBuffer),
       };
-      console.log("Decrypted data:", decryptedDataStrings);
-  
+
+      setDecryptedReports(prevState => ({ ...prevState, [reportId]: decryptedDataStrings }));
+
       return decryptedDataStrings;
     } catch (error) {
       console.error("Error during decryption:", error);
@@ -179,19 +186,22 @@ export default function Reports() {
           </tr>
         </thead>
         <tbody>
-        {reports.map((report) => (
-          console.log("Report:", report),
-            <tr key={report.reportID}>
-              <td className="column">{report.industryName}</td>
-              <td className="column">{report.companyName}</td>
-              <td className="column">{report.description}</td>
-              <td className="column">
-                <button onClick={() => decryptReport(report.reportID)}>
-                  Decrypt report
-                </button>
-              </td>
-            </tr>
-          ))}
+        {reports.map(
+            (report) => (
+              (
+                <tr key={report.reportID}>
+                  <td className="column">{report.industryName}</td>
+                  <td className="column">{decryptedReports[report.reportID]?.companyName || report.companyName}</td>
+                  <td className="column">{decryptedReports[report.reportID]?.description || report.description}</td>
+                  <td className="column">
+                    <button onClick={() => decryptReport(report.reportID)}>
+                      Decrypt report
+                    </button>
+                  </td>
+                </tr>
+              )
+            )
+          )}
         </tbody>
       </table>
     </div>
