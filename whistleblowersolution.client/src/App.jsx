@@ -1,21 +1,30 @@
 import "./App.css";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import Information from "./pages/Information";
 import Login from "./pages/Login";
 import Register from "./pages/RegisterRegulator";
 import Reports from "./pages/BrowseReports";
 import SendReport from "./pages/SendReport";
 import Cookies from 'js-cookie';
+import { useEffect } from "react";
 
 // This is a functional component that checks if a JWT token exists in the cookies.
 // If the token exists, it renders the children components, otherwise it redirects the user to the login page.
 function PrivateRoute({ children }) {
+  const navigate = useNavigate(); // Get the navigate function from the hook
   const token = Cookies.get('JWT') // Get the JWT token from the cookies
-  return token ? children : <Navigate to="/login" replace />; // If token exists, render children (Reports page), else redirect to login
+  if (!token) {
+    navigate('/login'); // If token doesn't exist, redirect to login
+    return null;
+  }
+  return children // If token exists, render children (Reports page), else redirect to login
 }
 
 // This is the main App component which sets up the routing for the application.
 export default function App() {
+useEffect(() => {
+  Cookies.remove('JWT');
+}, []);
   return (
     // The Routes component is a wrapper for all Route components.
     <Routes>
