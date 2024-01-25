@@ -3,19 +3,25 @@ import "./SendReport.css";
 import JSEncrypt from "jsencrypt";
 
 export default function SendReport() {
+  // The host URL for the API
   const host = "http://localhost:5241/";
 
+  // State variables for the industry, company name, and report details
   const [industry, setIndustry] = useState("");
   const [companyName, setCompanyName] = useState("");
   const [reportDetails, setReportDetails] = useState("");
 
+  // Initialize JSEncrypt for RSA encryption
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
+  // Function to derive a cryptographic key using PBKDF2
   const deriveKey = async () => {
+    // Generate a random key and salt
     let key = crypto.getRandomValues(new Uint8Array(32));
 
     let salt = crypto.getRandomValues(new Uint8Array(16));
 
+    // Encode the key and import it into a CryptoKey object
     const encodedKey = new TextEncoder().encode(key);
 
     const keyMat = await crypto.subtle.importKey(
@@ -26,6 +32,7 @@ export default function SendReport() {
       ["deriveBits", "deriveKey"]
     );
 
+    // Derive a new key from the original key and salt
     const derivedKey = await crypto.subtle.deriveKey(
       {
         name: "PBKDF2",
@@ -42,7 +49,9 @@ export default function SendReport() {
     return derivedKey;
   };
 
+  // Function to encrypt the input values using AES-GCM
   const encryptValues = async (inputs, encryptionKey) => {
+    // Export the encryption key to raw data and derive a new key from it
     const keyMaterial = await crypto.subtle.exportKey("raw", encryptionKey);
 
     let salt = crypto.getRandomValues(new Uint8Array(16));
@@ -66,6 +75,7 @@ export default function SendReport() {
       ["encrypt", "decrypt"]
     );
 
+    // Generate an initialization vector and encrypt the inputs
     const iv = crypto.getRandomValues(new Uint8Array(16));
     const ciphers = await Promise.all(
       inputs.map((input) =>
@@ -77,6 +87,7 @@ export default function SendReport() {
       )
     );
 
+    // Return the encrypted data along with the IV and salt
     return {
       iv: Array.from(iv),
       salt: Array.from(salt),
@@ -86,6 +97,7 @@ export default function SendReport() {
     };
   };
 
+  // Function to export a CryptoKey to a base64 string
   const exportkey = async (cryptoKey) => {
     const exportedKey = await crypto.subtle.exportKey("raw", cryptoKey);
     const keyAsUint8Array = new Uint8Array(exportedKey);
@@ -97,9 +109,11 @@ export default function SendReport() {
     return keyAsBase64;
   };
 
+  // Function to handle the form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Fetch the public key from the API
     let publicKey = await fetch(
       `${host}api/Regulator/GetPublicKey/${industry}`,
       {
@@ -112,21 +126,19 @@ export default function SendReport() {
       .then((res) => res.json())
       .then((res) => res.publicKey);
 
+    // Set the public key for the JSEncrypt instance
     encrypt.setPublicKey(publicKey);
+
+    // Derive a key, encrypt the report details and company name, and export the key to a base64 string
     let encryptionKey = await deriveKey();
     let encryptedData = await encryptValues(
       [reportDetails, companyName],
       encryptionKey
     );
-    console.log(
-      "encryptionKey before being passed to exportKey:",
-      encryptionKey
-    );
+
     encryptionKey = await exportkey(encryptionKey);
-    console.log(
-      "encryptionKey after being passed to exportKey:",
-      encryptionKey
-    );
+
+    // Convert the IV, salt, and encrypted data to base64 strings
     let encryptedIv = btoa(String.fromCharCode.apply(null, encryptedData.iv));
 
     let encryptedSalt = btoa(
@@ -139,6 +151,7 @@ export default function SendReport() {
       String.fromCharCode.apply(null, encryptedData.inputs[1].data)
     );
 
+    // Validate the form inputs
     if (industry === "") {
       alert("Please select an industry");
       return;
@@ -153,7 +166,8 @@ export default function SendReport() {
       alert("Please enter a report description");
       return;
     }
-    // Send report using Axios
+
+    // Send the report to the API
     await fetch(`${host}api/Report/sendReport`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

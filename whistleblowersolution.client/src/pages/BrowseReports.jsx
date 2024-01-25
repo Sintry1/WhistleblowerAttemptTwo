@@ -5,10 +5,14 @@ import { jwtDecode } from "jwt-decode";
 import JSEncrypt from "jsencrypt";
 
 export default function Reports() {
+  // Initialize state variables for storing reports and decrypted reports
   const [reports, setReports] = useState([]);
   const [decryptedReports, setDecryptedReports] = useState({});
+
+  // Initialize JSEncrypt instance for encryption and decryptio
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
+  // Use useEffect hook to fetch reports when the component mounts
   useEffect(() => {
     const token = Cookies.get("JWT");
     if (token) {
@@ -17,8 +21,10 @@ export default function Reports() {
     }
   }, []);
 
+  // Define the host URL for the API
   const host = "http://localhost:5241/";
 
+  // Define an async function to fetch reports from the API
   const fetchReports = async (industry) => {
     try {
       const response = await fetch(
@@ -46,6 +52,7 @@ export default function Reports() {
     }
   };
 
+  // Define an async function to import a key for decryption
   const importKey = async (keyString) => {
     let keyAsBinaryString = atob(keyString);
     let keyAsArrayBuffer = new Uint8Array(keyAsBinaryString.length);
@@ -62,6 +69,7 @@ export default function Reports() {
     return importedKey;
   };
 
+  // Define a function to get the private key from a file
   const getPrivateKey = () => {
     // Get private key from file
     return new Promise((resolve, reject) => {
@@ -89,90 +97,105 @@ export default function Reports() {
     });
   };
 
-  const decryptReport = async (reportId) => {
-    // Get private key from file
-    await getPrivateKey();
-    let decryptionKey = encrypt.decrypt(reports[reportId - 1].key);
-    let salt = encrypt.decrypt(reports[reportId - 1].salt);
-    let iv = encrypt.decrypt(reports[reportId - 1].iv);
+  // Define an async function to decrypt a report given the report ID
+const decryptReport = async (reportId) => {
+  // Get the private key from a file
+  await getPrivateKey();
 
-    decryptionKey = await importKey(decryptionKey);
+  // Decrypt the key, salt, and initialization vector (iv) from the report
+  let decryptionKey = encrypt.decrypt(reports[reportId - 1].key);
+  let salt = encrypt.decrypt(reports[reportId - 1].salt);
+  let iv = encrypt.decrypt(reports[reportId - 1].iv);
 
-    try {
-      const keyMaterial = await window.crypto.subtle.exportKey(
+  // Import the decryption key
+  decryptionKey = await importKey(decryptionKey);
+
+  try {
+    // Export the decryption key material
+    const keyMaterial = await window.crypto.subtle.exportKey(
+      "raw",
+      decryptionKey
+    );
+
+    // Convert the salt and iv from base64 to byte arrays
+    salt = new Uint8Array(
+      atob(salt)
+        .split("")
+        .map((char) => char.charCodeAt(0))
+    );
+    iv = new Uint8Array(
+      atob(iv)
+        .split("")
+        .map((char) => char.charCodeAt(0))
+    );
+
+    // Derive the AES-GCM key using PBKDF2
+    const key = await crypto.subtle.deriveKey(
+      {
+        name: "PBKDF2",
+        salt: salt,
+        iterations: 100000,
+        hash: { name: "SHA-256" },
+      },
+      await crypto.subtle.importKey(
         "raw",
-        decryptionKey
-      );
+        keyMaterial,
+        { name: "PBKDF2" },
+        false,
+        ["deriveKey"]
+      ),
+      { name: "AES-GCM", length: 256 },
+      true,
+      ["encrypt", "decrypt"]
+    );
 
-      salt = new Uint8Array(
-        atob(salt)
-          .split("")
-          .map((char) => char.charCodeAt(0))
-      );
+    // Convert the encrypted company name and description from base64 to byte arrays
+    const encryptedCompanyData = new Uint8Array(
+      atob(reports[reportId - 1].companyName)
+        .split("")
+        .map((char) => char.charCodeAt(0))
+    );
+    const encryptedDescriptionData = new Uint8Array(
+      atob(reports[reportId - 1].description)
+        .split("")
+        .map((char) => char.charCodeAt(0))
+    );
 
-      iv = new Uint8Array(
-        atob(iv)
-          .split("")
-          .map((char) => char.charCodeAt(0))
-      );
+    // Decrypt the company name and description using the derived key and iv
+    const decryptedCompanyDataBuffer = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      encryptedCompanyData
+    );
+    const decryptedDescriptionDataBuffer = await crypto.subtle.decrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      encryptedDescriptionData
+    );
 
-      const key = await crypto.subtle.deriveKey(
-        {
-          name: "PBKDF2",
-          salt: salt,
-          iterations: 100000,
-          hash: { name: "SHA-256" },
-        },
-        await crypto.subtle.importKey(
-          "raw",
-          keyMaterial,
-          { name: "PBKDF2" },
-          false,
-          ["deriveKey"]
-        ),
-        { name: "AES-GCM", length: 256 },
-        true,
-        ["encrypt", "decrypt"]
-      );
+    // Convert the decrypted data from byte arrays to strings
+    const decryptedDataStrings = {
+      companyName: new TextDecoder().decode(decryptedCompanyDataBuffer),
+      description: new TextDecoder().decode(decryptedDescriptionDataBuffer),
+    };
 
-      const encryptedCompanyData = new Uint8Array(
-        atob(reports[reportId - 1].companyName)
-          .split("")
-          .map((char) => char.charCodeAt(0))
-      );
-      const encryptedDescriptionData = new Uint8Array(
-        atob(reports[reportId - 1].description)
-          .split("")
-          .map((char) => char.charCodeAt(0))
-      );
+    // Update the state with the decrypted data
+    setDecryptedReports((prevState) => ({
+      ...prevState,
+      [reportId]: decryptedDataStrings,
+    }));
 
-      const decryptedCompanyDataBuffer = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: iv },
-        key,
-        encryptedCompanyData
-      );
-
-      const decryptedDescriptionDataBuffer = await crypto.subtle.decrypt(
-        { name: "AES-GCM", iv: iv },
-        key,
-        encryptedDescriptionData
-      );
-
-      const decryptedDataStrings = {
-        companyName: new TextDecoder().decode(decryptedCompanyDataBuffer),
-        description: new TextDecoder().decode(decryptedDescriptionDataBuffer),
-      };
-
-      setDecryptedReports(prevState => ({ ...prevState, [reportId]: decryptedDataStrings }));
-
-      return decryptedDataStrings;
-    } catch (error) {
-      console.error("Error during decryption:", error);
-      console.error("Error name:", error.name);
-      console.error("Error message:", error.message);
-      throw error;
-    }
-  };
+    // Return the decrypted data
+    return decryptedDataStrings;
+  } catch (error) {
+    // Log any errors that occur during decryption
+    console.error("Error during decryption:", error);
+    console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
+    // Rethrow the error to be caught by the calling function
+    throw error;
+  }
+};
 
   return (
     <div className="parent-div">
@@ -186,22 +209,24 @@ export default function Reports() {
           </tr>
         </thead>
         <tbody>
-        {reports.map(
-            (report) => (
-              (
-                <tr key={report.reportID}>
-                  <td className="narrowcolumn">{report.industryName}</td>
-                  <td className="narrowcolumn">{decryptedReports[report.reportID]?.companyName || report.companyName}</td>
-                  <td className="widecolumn">{decryptedReports[report.reportID]?.description || report.description}</td>
-                  <td className="narrowcolumn">
-                    <button onClick={() => decryptReport(report.reportID)}>
-                      Decrypt report
-                    </button>
-                  </td>
-                </tr>
-              )
-            )
-          )}
+          {reports.map((report) => (
+            <tr key={report.reportID}>
+              <td className="narrowcolumn">{report.industryName}</td>
+              <td className="narrowcolumn">
+                {decryptedReports[report.reportID]?.companyName ||
+                  report.companyName}
+              </td>
+              <td className="widecolumn">
+                {decryptedReports[report.reportID]?.description ||
+                  report.description}
+              </td>
+              <td className="narrowcolumn">
+                <button onClick={() => decryptReport(report.reportID)}>
+                  Decrypt report
+                </button>
+              </td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

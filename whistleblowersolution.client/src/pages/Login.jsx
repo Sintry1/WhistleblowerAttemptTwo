@@ -5,17 +5,23 @@ import { Link, useNavigate } from "react-router-dom";
 import Cookies from "js-cookie";
 
 export default function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [industry, setIndustry] = useState("");
+  // useState hooks are used to manage state in functional components.
+  const [username, setUsername] = useState(""); // State for username
+  const [password, setPassword] = useState(""); // State for password
+  const [industry, setIndustry] = useState(""); // State for industry
 
+  // useNavigate hook from react-router-dom is used for navigation.
   const navigate = useNavigate();
 
+  // Initialize JSEncrypt for encryption and decryption.
   const host = "http://localhost:5241/";
 
+  // Initialize JSEncrypt for encryption and decryption.
   const encrypt = new JSEncrypt({ default_key_size: 2048 });
 
+  // Function to check if the entered password matches the stored password
   const checkPassword = async (password, industry) => {
+    // Fetch the stored hashed password from the API.
     const storedPassword = await fetch(
       `${host}api/Regulator/PasswordCheck/${industry}`,
       {
@@ -26,10 +32,13 @@ export default function Login() {
       }
     );
     const data = await storedPassword.json();
+    // Compare the entered password with the stored password using bcrypt.
     return bcrypt.compareSync(password, data.hashedPassword);
   };
 
+  // Function to check if the entered username matches the stored username.
   const checkUsername = async (username, industry) => {
+    // Fetch the stored username from the API.
     const storedUsername = await fetch(
       `${host}api/Regulator/GetUserName/${industry}`,
       {
@@ -43,14 +52,14 @@ export default function Login() {
 
     // Wrap the file reading operation in a Promise
     return new Promise((resolve, reject) => {
-      // Prompt user to upload file contents
+      // Create a file input element to prompt the user to upload a file.
       const fileInput = document.createElement("input");
       fileInput.type = "file";
       fileInput.accept = ".txt"; // Specify the accepted file type(s) here
       fileInput.addEventListener("change", (event) => {
         const file = event.target.files[0];
         if (file) {
-          // Process the file contents here
+          // Create a FileReader to read the contents of the file.
           const reader = new FileReader();
           reader.onload = (e) => {
             const fileContents = e.target.result;
@@ -70,13 +79,14 @@ export default function Login() {
     });
   };
 
+  // Function to handle form submission.
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const usernameMatch = await checkUsername(username, industry);
       // Check if user exists
       if (!usernameMatch) {
-        throw new Error("Username does not match");
+        throw new Error("There was an error logging in, please try again");
       }
 
       const passwordMatch = await checkPassword(password, industry);
@@ -97,12 +107,14 @@ export default function Login() {
         },
       });
 
+      // If the response is OK, set the JWT token in the cookies.
       if (response.ok) {
         const data = await response.json();
         Cookies.set("JWT", data.token);
       }
+      // Navigate to the reports page.
       navigate("/reports");
-      // if password matches, login by redirecting to reports page
+      
     } catch (err) {
       console.log(err);
     }
