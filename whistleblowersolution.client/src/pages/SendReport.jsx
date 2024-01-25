@@ -179,7 +179,15 @@ export default function SendReport() {
         CompanyName: encryptedCompanyString,
         Description: encryptedReportString,
       }),
-    }).then((res) => res.json());
+    }).then((res) => {
+      if (res.status === 200) {
+        alert("Report submitted successfully");
+        setCompanyName("");
+        setReportDetails("");
+        setIndustry("");
+        e.target.reset();
+      }
+    });
   };
 
   return (
